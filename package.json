@@ -18,6 +18,7 @@
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
     "typescript": "^5.0.2",
+    "uuid": "^9.0.1",
     "viem": "^1.17.2",
     "wagmi": "^1.4.5",
     "web-vitals": "^2.1.4"

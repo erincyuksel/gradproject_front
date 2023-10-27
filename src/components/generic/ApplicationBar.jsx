@@ -7,37 +7,32 @@ import Button from "@mui/material/Button";
 import { MenuItem } from "@mui/material";
 import { useAccount, useConnect, useEnsName, useDisconnect } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import { useNavigate } from "react-router-dom";
 
 export default function ApplicationBar() {
+  let navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const { data: ensName } = useEnsName({ address });
   const { connect } = useConnect({
     connector: new InjectedConnector(),
   });
 
-  const test = async () => {
-    await window.ethereum.request({
-      method: "eth_decrypt",
-      params: ["asdasdasd", address],
-    });
-  };
-
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ bgcolor: "#555555" }}>
         <Toolbar>
           <MenuItem>
-            <Typography variant="h6" component="a" sx={{ flexGrow: 1 }}>
+            <Typography
+              variant="h6"
+              component="a"
+              sx={{ flexGrow: 1 }}
+              onClick={() => navigate("/")}
+            >
               Auctions
             </Typography>
           </MenuItem>
-          <MenuItem>
-            <Typography variant="h6" component="a" sx={{ flexGrow: 1 }}>
-              Disputes
-            </Typography>
-          </MenuItem>
           {isConnected ? (
-            <div style={{ marginLeft: "auto" }} onClick={test}>
+            <div style={{ marginLeft: "auto" }}>
               Connected to {ensName ?? address}
             </div>
           ) : (
