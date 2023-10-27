@@ -25,7 +25,6 @@ export default function CreateAuctionModal() {
     console.log(debouncedAuctionName);
     console.log(debouncedUuid);
   };
-
   const [auctionName, setAuctionName] = useState("");
   const [reservePrice, setReservePrice] = useState(1000);
   const [uuid, setUuid] = useState(uuidv4());
@@ -42,6 +41,7 @@ export default function CreateAuctionModal() {
   });
 
   const { write } = useContractWrite(config);
+
   return (
     <Grid container justify="center" spacing={1}>
       <Grid item xs={12}>

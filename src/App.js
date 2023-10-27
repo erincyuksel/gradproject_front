@@ -8,6 +8,7 @@ import ApplicationBar from "./components/generic/ApplicationBar";
 import { publicProvider } from "wagmi/providers/public";
 import { WagmiConfig, createConfig, configureChains, mainnet } from "wagmi";
 import { sepolia, localhost } from "viem/chains";
+import { InjectedConnector } from "wagmi/connectors/injected";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [localhost],
   [publicProvider()]
@@ -16,6 +17,7 @@ const config = createConfig({
   autoConnect: true,
   publicClient,
   webSocketPublicClient,
+  connectors: [new InjectedConnector()],
 });
 
 function App() {

@@ -5,7 +5,13 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { MenuItem } from "@mui/material";
-import { useAccount, useConnect, useEnsName, useDisconnect } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useEnsName,
+  useDisconnect,
+  useConfig,
+} from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { useNavigate } from "react-router-dom";
 
@@ -13,8 +19,11 @@ export default function ApplicationBar() {
   let navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const { data: ensName } = useEnsName({ address });
+  const { connectors } = useConfig();
+
   const { connect } = useConnect({
-    connector: new InjectedConnector(),
+    // connector: new InjectedConnector() // <-- removed this line
+    connector: connectors[0], // <-- added this
   });
 
   return (

@@ -1,4 +1,4 @@
-import { useAccount, useConnect, useEnsName } from "wagmi";
+import { useAccount } from "wagmi";
 import { Box, Grid, Paper, Button, Modal, Typography } from "@mui/material";
 import AuctionItem from "../components/auction/AuctionItem";
 import { useState } from "react";
@@ -7,21 +7,26 @@ function Auctions() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const { address, isConnected } = useAccount();
+
   return (
     <Box sx={{ bgcolor: "#eeeedd" }}>
-      <Button
-        onClick={handleOpen}
-        variant={"contained"}
-        color="primary"
-        sx={{
-          border: "2px solid",
-          bgcolor: "#2e5d4b",
-          marginTop: "5px",
-          marginBottom: "5px",
-        }}
-      >
-        Create Auction
-      </Button>
+      {isConnected && (
+        <Button
+          onClick={handleOpen}
+          variant={"contained"}
+          color="primary"
+          sx={{
+            border: "2px solid",
+            bgcolor: "#2e5d4b",
+            marginTop: "5px",
+            marginBottom: "5px",
+          }}
+        >
+          Create Auction
+        </Button>
+      )}
+
       <Modal
         open={open}
         onClose={handleClose}
