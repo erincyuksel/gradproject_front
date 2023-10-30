@@ -6,14 +6,15 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { MenuItem } from "@mui/material";
 import ProfilePopover from "../profile/ProfilePopover";
+import auction from "../../auction.json";
 import {
   useAccount,
   useConnect,
   useEnsName,
   useDisconnect,
   useConfig,
+  useContractReads,
 } from "wagmi";
-import { InjectedConnector } from "wagmi/connectors/injected";
 import { useNavigate } from "react-router-dom";
 
 export default function ApplicationBar() {
@@ -25,6 +26,26 @@ export default function ApplicationBar() {
   const { connect } = useConnect({
     // connector: new InjectedConnector() // <-- removed this line
     connector: connectors[0], // <-- added this
+  });
+
+  const auctionContract = {
+    address: auction.address,
+    abi: auction.abi,
+  };
+
+  const { data, isError, isLoading } = useContractReads({
+    contracts: [
+      {
+        ...auction,
+        functionName: "getTokensToStake",
+      },
+      {
+        ...auction,
+        functionName: "getPubKey",
+        args: [address],
+      },
+      { ...auction, functionName: "getActiveAuctioneer" },
+    ],
   });
 
   return (
