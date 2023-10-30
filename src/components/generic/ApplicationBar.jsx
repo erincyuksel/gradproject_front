@@ -5,6 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { MenuItem } from "@mui/material";
+import ProfilePopover from "../profile/ProfilePopover";
 import {
   useAccount,
   useConnect,
@@ -53,6 +54,7 @@ export default function ApplicationBar() {
               Connect Wallet
             </Button>
           )}
+          {isConnected && <ProfilePopover></ProfilePopover>}
         </Toolbar>
       </AppBar>
     </Box>
