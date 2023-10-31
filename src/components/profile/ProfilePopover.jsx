@@ -98,6 +98,9 @@ const ProfilePopover = () => {
   const handleSetPublicKey = () => {
     setPubKeyFunc().then(() => {
       setPubkey(enteredPubkey);
+      enqueueSnackbar("Successfully set the public key", {
+        variant: "success",
+      });
     });
   };
 
@@ -119,6 +122,9 @@ const ProfilePopover = () => {
       .then(() => {
         setStakeTokensFunc().then(() => {
           setStakedAmount(tokensToStake);
+          enqueueSnackbar("Successfully staked required tokens!", {
+            variant: "success",
+          });
         });
       })
       .catch(() => {

@@ -1,10 +1,22 @@
-import { Card, CardHeader, Grid, TextField, Button } from "@mui/material";
+import {
+  Card,
+  CardHeader,
+  Grid,
+  TextField,
+  Button,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import auction from "../../auction.json";
 import obscurity from "../../obscurity.json";
 import { usePrepareContractWrite, useContractWrite } from "wagmi";
 import { useDebounce } from "../../hooks/useDebounce";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { styled } from "@mui/material/styles";
+import utils from "../../utility";
+import { enqueueSnackbar } from "notistack";
+
 export default function CreateAuctionModal() {
   const style = {
     position: "absolute",
@@ -17,7 +29,17 @@ export default function CreateAuctionModal() {
     boxShadow: 24,
     p: 4,
   };
-
+  const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    whiteSpace: "nowrap",
+    width: 1,
+  });
   const handleSubmit = (event) => {
     event.preventDefault();
     write();
@@ -27,6 +49,7 @@ export default function CreateAuctionModal() {
   };
   const [auctionName, setAuctionName] = useState("");
   const [reservePrice, setReservePrice] = useState(1000);
+  const [image, setImage] = useState("");
   const [uuid, setUuid] = useState(uuidv4());
 
   const debouncedAuctionName = useDebounce(auctionName, 500);
@@ -41,6 +64,16 @@ export default function CreateAuctionModal() {
   });
 
   const { write } = useContractWrite(config);
+
+  const handleUpload = (e) => {
+    if (utils.fileIsImage(e.target.files[0].name)) {
+      console.log(e.target.files[0]);
+      setImage(e.target.files[0]);
+      enqueueSnackbar("Image has been uploaded!", { variant: "success" });
+    } else {
+      enqueueSnackbar("Please upload an image file!", { variant: "error" });
+    }
+  };
 
   return (
     <Grid container justify="center" spacing={1}>
@@ -69,6 +102,26 @@ export default function CreateAuctionModal() {
                   label="Reserve Price"
                   onChange={(e) => setReservePrice(e.target.value)}
                 />
+              </Grid>
+              <Grid item container spacing={1} justify="center">
+                <Grid item xs={6}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    sx={{ bgcolor: "#2e5d4b" }}
+                    startIcon={<CloudUploadIcon />}
+                  >
+                    Upload Image
+                    <VisuallyHiddenInput
+                      type="file"
+                      onChange={handleUpload}
+                      accept="image/*"
+                    />
+                  </Button>
+                </Grid>
+                <Grid item xs={6} sx={{ marginTop: "5px" }}>
+                  <Typography>{image.name}</Typography>
+                </Grid>
               </Grid>
               <Grid item xs={12}>
                 <Button
