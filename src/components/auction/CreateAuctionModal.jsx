@@ -17,6 +17,7 @@ import { styled } from "@mui/material/styles";
 import utils from "../../utility";
 import { enqueueSnackbar } from "notistack";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import utility from "../../utility";
 export default function CreateAuctionModal() {
   const style = {
     position: "absolute",
@@ -65,32 +66,33 @@ export default function CreateAuctionModal() {
 
   const { write } = useContractWrite(config);
 
-  const handleUpload = (e) => {
+  const handleUpload = async (e) => {
     if (utils.fileIsImage(e.target.files[0].name)) {
       console.log(e.target.files[0]);
       setImage(e.target.files[0]);
       const storage = getStorage();
-      const imgRef = ref(storage, "images/" + e.target.files[0].name);
-      uploadBytes(imgRef, e.target.files[0]).then(async (snapshot) => {
-        console.log("Uploaded a file!");
-        let buffer = await e.target.files[0].arrayBuffer();
-        crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-          console.log(Array.from(new Uint8Array(hash)));
+      let buffer = await e.target.files[0].arrayBuffer();
+      crypto.subtle.digest("SHA-256", buffer).then((hash) => {
+        let hex = utils.toHexString(new Uint8Array(hash));
+        const imgRef = ref(storage, "images/" + hex);
+        uploadBytes(imgRef, e.target.files[0]).then(async (snapshot) => {
+          console.log("Uploaded a file!");
         });
       });
-      getDownloadURL(imgRef).then((url) => {
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = "blob";
-        xhr.onload = async (event) => {
-          const blob = xhr.response;
-          const buffer = await blob.arrayBuffer();
-          crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-            console.log(Array.from(new Uint8Array(hash)));
-          });
-        };
-        xhr.open("GET", url);
-        xhr.send();
-      });
+
+      // getDownloadURL(imgRef).then((url) => {
+      //   const xhr = new XMLHttpRequest();
+      //   xhr.responseType = "blob";
+      //   xhr.onload = async (event) => {
+      //     const blob = xhr.response;
+      //     const buffer = await blob.arrayBuffer();
+      //     crypto.subtle.digest("SHA-256", buffer).then((hash) => {
+      //       console.log(Array.from(new Uint8Array(hash)));
+      //     });
+      //   };
+      //   xhr.open("GET", url);
+      //   xhr.send();
+      // });
       enqueueSnackbar("Image has been uploaded!", { variant: "success" });
     } else {
       enqueueSnackbar("Please upload an image file!", { variant: "error" });
@@ -112,6 +114,16 @@ export default function CreateAuctionModal() {
                   value={auctionName}
                   label="Auction Name"
                   onChange={(e) => setAuctionName(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  placeholder="Item Description"
+                  label="Item Descriptions"
+                  multiline
+                  fullWidth
+                  required
+                  maxRows={4}
                 />
               </Grid>
               <Grid item xs={12}>
