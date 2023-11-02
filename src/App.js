@@ -7,8 +7,8 @@ import Auctions from "./pages/Auctions";
 import ApplicationBar from "./components/generic/ApplicationBar";
 import { publicProvider } from "wagmi/providers/public";
 import { WagmiConfig, createConfig, configureChains, mainnet } from "wagmi";
-import { sepolia, localhost } from "viem/chains";
-import { InjectedConnector } from "wagmi/connectors/injected";
+import { localhost } from "viem/chains";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [localhost],
   [publicProvider()]
@@ -16,8 +16,12 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
 const config = createConfig({
   autoConnect: true,
   publicClient,
-  webSocketPublicClient,
-  connectors: [new InjectedConnector()],
+  connectors: [
+    new MetaMaskConnector({
+      shimDisconnect: true,
+      chains: chains,
+    }),
+  ],
 });
 
 function App() {

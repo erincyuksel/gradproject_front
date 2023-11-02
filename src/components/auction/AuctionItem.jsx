@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
+import { Grid } from "@mui/material";
 import CardMedia from "@mui/material/CardMedia";
 import { CardHeader } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -9,13 +10,18 @@ import Typography from "@mui/material/Typography";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import utility from "../../utility";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
-import { bgcolor } from "@mui/system";
+import { TextField } from "@mui/material";
+import { useAccount, usePrepareContractWrite, useContractWrite } from "wagmi";
+import { useDebounce } from "../../hooks/useDebounce";
+import auction from "../../auction.json";
+import { enqueueSnackbar } from "notistack";
 export default function AuctionItem(props) {
   const [url, setUrl] = useState("");
   const [hourRemaining, setHourRemaining] = useState("00");
   const [minuteRemaining, setMinuteRemaining] = useState("00");
   const [secondRemaining, setSecondRemaining] = useState("00");
-
+  const [bid, setBid] = useState("");
+  const debouncedBid = useDebounce(bid, 500);
   useEffect(() => {
     const storage = getStorage();
     setInterval(() => {
@@ -43,6 +49,28 @@ export default function AuctionItem(props) {
       // xhr.send();
     });
   }, []);
+
+  const { config: bidConfig } = usePrepareContractWrite({
+    address: auction.address,
+    abi: auction.abi,
+    functionName: "placeBid",
+    args: [props.item.itemId, debouncedBid],
+  });
+
+  const { writeAsync: placeBid } = useContractWrite(bidConfig);
+
+  const handleBid = () => {
+    placeBid()
+      .then(() => {
+        enqueueSnackbar("You have successfully bid on the item!", {
+          variant: "success",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        enqueueSnackbar("There was en error during bid!", { variant: "error" });
+      });
+  };
 
   return (
     <Card
@@ -73,14 +101,52 @@ export default function AuctionItem(props) {
         <Typography gutterBottom variant="h5" component="div">
           {props.item.itemName}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography gutterBottom variant="body2" color="text.secondary">
           {props.item.itemDescription}
         </Typography>
+        <Grid container direction="column" alignItems="center">
+          <Grid item>
+            <Typography gutterBottom variant="body2" color="text.secondary">
+              {"Highest Bid: " + Number(props.item.highestBid)}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography gutterBottom variant="body2" color="text.secondary">
+              {props.item.highestBidder}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography gutterBottom variant="body2" color="text.secondary">
+              {props.item.ended ? "ENDED" : "ONGOING"}
+            </Typography>
+          </Grid>
+        </Grid>
       </CardContent>
-      <CardActions>
-        <Button size="small">Share</Button>
-        <Button size="small">Learn More</Button>
-      </CardActions>
+      {!props.item.ended && (
+        <CardActions>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ backgroundColor: "#2e5d4b" }}
+                disabled={!placeBid}
+              >
+                BID
+              </Button>
+            </Grid>
+            <Grid item>
+              <TextField
+                label="BID OT"
+                variant="outlined"
+                fullWidth
+                onChange={(e) => setBid(e.target.value)}
+                onClick={handleBid}
+              />
+            </Grid>
+          </Grid>
+        </CardActions>
+      )}
     </Card>
   );
 }

@@ -39,7 +39,6 @@ function Auctions() {
           variant={"contained"}
           color="primary"
           sx={{
-            border: "2px solid",
             bgcolor: "#2e5d4b",
             marginTop: "5px",
             marginBottom: "5px",
@@ -60,7 +59,7 @@ function Auctions() {
         </>
       </Modal>
       <Grid container spacing={2}>
-        {data[0]
+        {data && data[0].result
           ? data[0].result.map((auctionItem) => {
               return (
                 <Grid item xs={4}>

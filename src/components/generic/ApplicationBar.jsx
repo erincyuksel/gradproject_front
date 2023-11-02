@@ -21,17 +21,7 @@ export default function ApplicationBar() {
   let navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const { data: ensName } = useEnsName({ address });
-  const { connectors } = useConfig();
-
-  const { connect } = useConnect({
-    // connector: new InjectedConnector() // <-- removed this line
-    connector: connectors[0], // <-- added this
-  });
-
-  const auctionContract = {
-    address: auction.address,
-    abi: auction.abi,
-  };
+  const { connect, connectors } = useConnect();
 
   const { data, isError, isLoading } = useContractReads({
     contracts: [
@@ -76,7 +66,7 @@ export default function ApplicationBar() {
             <Button
               color="inherit"
               sx={{ marginLeft: "auto" }}
-              onClick={() => connect()}
+              onClick={() => connect({ connector: connectors[0] })}
             >
               Connect Wallet
             </Button>

@@ -1,3 +1,4 @@
+/* global BigInt */
 import {
   Card,
   CardHeader,
@@ -63,7 +64,7 @@ export default function CreateAuctionModal() {
   };
   const [auctionName, setAuctionName] = useState("");
   const [reservePrice, setReservePrice] = useState(1000);
-  const [itemDescription, setItemDescription] = useState("1000");
+  const [itemDescription, setItemDescription] = useState("");
   const [image, setImage] = useState("");
   const [hashOfImage, setHashOfImage] = useState(Array(32).fill(0));
   const [uuid, setUuid] = useState(uuidv4());
@@ -83,7 +84,7 @@ export default function CreateAuctionModal() {
       debouncedAuctionName,
       debouncedItemDescription,
       debouncedHashOfImage,
-      debouncedReservePrice,
+      BigInt(debouncedReservePrice * 10 ** 18),
     ],
   });
 

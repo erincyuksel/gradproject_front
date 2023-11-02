@@ -1,3 +1,4 @@
+/* global BigInt */
 import { useState, useEffect } from "react";
 import {
   IconButton,
@@ -26,6 +27,7 @@ const ProfilePopover = () => {
   const [tokensToStake, setTokensToStake] = useState(0);
   const [enteredPubkey, setEnteredPubkey] = useState("");
   const [isStakeAllowed, setIsStakeAllowed] = useState(false);
+  const [balance, setBalance] = useState(0);
   const debouncedEnteredPubkey = useDebounce(enteredPubkey, 500);
   const debouncedTokensToStake = useDebounce(tokensToStake, 500);
   const open = Boolean(anchorEl);
@@ -45,7 +47,8 @@ const ProfilePopover = () => {
         functionName: "getPubKey",
         args: [address],
       },
-      { ...auction, functionName: "getActiveAuctioneer" },
+      { ...auction, functionName: "getActiveAuctioneer", args: [address] },
+      { ...obscurity, functionName: "balanceOf", args: [address] },
     ],
     watch: true,
   });
@@ -56,20 +59,23 @@ const ProfilePopover = () => {
     abi: auction.abi,
     functionName: "setPubKey",
     args: [debouncedEnteredPubkey],
+    account: address,
   });
 
   const { config: myConfig2 } = usePrepareContractWrite({
     address: obscurity.address,
     abi: obscurity.abi,
     functionName: "approve",
-    args: [auction.address, debouncedTokensToStake * 1000000000000000000],
+    args: [auction.address, BigInt(debouncedTokensToStake * 10 ** 18)],
+    account: address,
   });
 
   const { config: myConfig3 } = usePrepareContractWrite({
     address: auction.address,
     abi: auction.abi,
     functionName: "stakeTokens",
-    args: [debouncedTokensToStake],
+    args: [BigInt(debouncedTokensToStake * 10 ** 18)],
+    account: address,
   });
 
   const { data: data1, writeAsync: setPubKeyFunc } =
@@ -79,10 +85,12 @@ const ProfilePopover = () => {
     useContractWrite(myConfig3);
 
   const handlePopoverOpen = (event) => {
+    console.log(data);
     setAnchorEl(event.currentTarget);
-    setStakeRequired(Number(data[0].result));
+    setStakeRequired(Number(BigInt(data[0].result) / BigInt(10 ** 18)));
     setPubkey(data[1].result);
-    setStakedAmount(Number(data[2].result[0]));
+    setStakedAmount(Number(BigInt(data[2].result[0]) / BigInt(10 ** 18)));
+    setBalance(Number(BigInt(data[3].result) / BigInt(10 ** 18)));
     if (data[2].result[0] >= data[0].result) {
       setIsStakeAllowed(false);
     } else {
@@ -122,16 +130,23 @@ const ProfilePopover = () => {
   };
 
   const handleSetStakeTokens = () => {
+    console.log(tokensToStake);
+    console.log(stakeRequired);
+    console.log(stakedAmount);
+    console.log("asd");
     approve()
-      .then(() => {
-        setStakeTokensFunc().then(() => {
+      .then(async () => {
+        await new Promise((r) => setTimeout(r, 1500));
+        setStakeTokensFunc().then(async () => {
           setStakedAmount(tokensToStake);
+          setBalance(balance - tokensToStake);
           enqueueSnackbar("Successfully staked required tokens!", {
             variant: "success",
           });
         });
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e);
         enqueueSnackbar("Something went wrong!", { variant: "error" });
       });
   };
@@ -172,6 +187,7 @@ const ProfilePopover = () => {
           }}
         >
           <Typography variant="h6">System Overview</Typography>
+          <Typography>Token Balance: {balance} OT</Typography>
           <Typography>Current Stake: {stakedAmount} OT</Typography>
           <Typography>Needed Stake Amount: {stakeRequired} OT</Typography>
 
