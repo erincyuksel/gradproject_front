@@ -9,15 +9,13 @@ import {
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import auction from "../../auction.json";
-import obscurity from "../../obscurity.json";
 import { usePrepareContractWrite, useContractWrite } from "wagmi";
 import { useDebounce } from "../../hooks/useDebounce";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
 import utils from "../../utility";
 import { enqueueSnackbar } from "notistack";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import utility from "../../utility";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 export default function CreateAuctionModal() {
   const style = {
     position: "absolute",
@@ -41,59 +39,66 @@ export default function CreateAuctionModal() {
     whiteSpace: "nowrap",
     width: 1,
   });
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    write();
-    console.log(debouncedReservePrice);
-    console.log(debouncedAuctionName);
-    console.log(debouncedUuid);
+    const storage = getStorage();
+    const imgRef = ref(storage, "images/" + hashOfImage);
+    setUuid(uuidv4());
+    uploadBytes(imgRef, image)
+      .then(async (snapshot) => {
+        console.log("Uploaded a file!");
+        createItem()
+          .then(() => {
+            enqueueSnackbar("Successfully listed auction item", {
+              variant: "success",
+            });
+          })
+          .catch((e) => {
+            enqueueSnackbar("Something went wrong!", { variant: "error" });
+          });
+      })
+      .catch((e) => {
+        enqueueSnackbar("The image is not unique!", { variant: "error" });
+      });
   };
   const [auctionName, setAuctionName] = useState("");
   const [reservePrice, setReservePrice] = useState(1000);
+  const [itemDescription, setItemDescription] = useState("1000");
   const [image, setImage] = useState("");
+  const [hashOfImage, setHashOfImage] = useState(Array(32).fill(0));
   const [uuid, setUuid] = useState(uuidv4());
 
   const debouncedAuctionName = useDebounce(auctionName, 500);
   const debouncedUuid = useDebounce(uuid, 500);
   const debouncedReservePrice = useDebounce(reservePrice, 500);
+  const debouncedItemDescription = useDebounce(itemDescription, 500);
+  const debouncedHashOfImage = useDebounce(hashOfImage, 500);
 
   const { config } = usePrepareContractWrite({
     address: auction.address,
     abi: auction.abi,
     functionName: "createAuctionItem",
-    args: [debouncedUuid, debouncedAuctionName, debouncedReservePrice],
+    args: [
+      debouncedUuid,
+      debouncedAuctionName,
+      debouncedItemDescription,
+      debouncedHashOfImage,
+      debouncedReservePrice,
+    ],
   });
 
-  const { write } = useContractWrite(config);
+  const { writeAsync: createItem } = useContractWrite(config);
 
   const handleUpload = async (e) => {
     if (utils.fileIsImage(e.target.files[0].name)) {
       console.log(e.target.files[0]);
       setImage(e.target.files[0]);
-      const storage = getStorage();
       let buffer = await e.target.files[0].arrayBuffer();
       crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-        let hex = utils.toHexString(new Uint8Array(hash));
-        const imgRef = ref(storage, "images/" + hex);
-        uploadBytes(imgRef, e.target.files[0]).then(async (snapshot) => {
-          console.log("Uploaded a file!");
-        });
+        setHashOfImage(utils.toHexString(new Uint8Array(hash)));
+        console.log(utils.toHexString(new Uint8Array(hash)));
+        enqueueSnackbar("Image has been set!", { variant: "success" });
       });
-
-      // getDownloadURL(imgRef).then((url) => {
-      //   const xhr = new XMLHttpRequest();
-      //   xhr.responseType = "blob";
-      //   xhr.onload = async (event) => {
-      //     const blob = xhr.response;
-      //     const buffer = await blob.arrayBuffer();
-      //     crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-      //       console.log(Array.from(new Uint8Array(hash)));
-      //     });
-      //   };
-      //   xhr.open("GET", url);
-      //   xhr.send();
-      // });
-      enqueueSnackbar("Image has been uploaded!", { variant: "success" });
     } else {
       enqueueSnackbar("Please upload an image file!", { variant: "error" });
     }
@@ -124,6 +129,7 @@ export default function CreateAuctionModal() {
                   fullWidth
                   required
                   maxRows={4}
+                  onChange={(e) => setItemDescription(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -163,7 +169,7 @@ export default function CreateAuctionModal() {
                   color="primary"
                   type="submit"
                   sx={{ bgcolor: "#2e5d4b" }}
-                  disabled={!write}
+                  disabled={!createItem}
                 >
                   Create
                 </Button>

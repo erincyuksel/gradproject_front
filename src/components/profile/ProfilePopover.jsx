@@ -96,12 +96,16 @@ const ProfilePopover = () => {
 
   // Function to set the public key
   const handleSetPublicKey = () => {
-    setPubKeyFunc().then(() => {
-      setPubkey(enteredPubkey);
-      enqueueSnackbar("Successfully set the public key", {
-        variant: "success",
+    setPubKeyFunc()
+      .then(() => {
+        setPubkey(enteredPubkey);
+        enqueueSnackbar("Successfully set the public key", {
+          variant: "success",
+        });
+      })
+      .catch((e) => {
+        enqueueSnackbar("Something went wrong!", { variant: "error" });
       });
-    });
   };
 
   const handleGetPubKey = async () => {
@@ -159,7 +163,14 @@ const ProfilePopover = () => {
           horizontal: "center",
         }}
       >
-        <div style={{ padding: "16px", maxWidth: "320px" }}>
+        <div
+          style={{
+            padding: "16px",
+            maxWidth: "320px",
+            background:
+              "linear-gradient(135deg, #2b5876, #4e4376, #b5127c, #cf4b4b)",
+          }}
+        >
           <Typography variant="h6">System Overview</Typography>
           <Typography>Current Stake: {stakedAmount} OT</Typography>
           <Typography>Needed Stake Amount: {stakeRequired} OT</Typography>

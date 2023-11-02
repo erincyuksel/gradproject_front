@@ -94,6 +94,16 @@
           "type": "string"
         },
         {
+          "internalType": "string",
+          "name": "itemDescription",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "hashOfImage",
+          "type": "string"
+        },
+        {
           "internalType": "address payable",
           "name": "seller",
           "type": "address"
@@ -184,6 +194,16 @@
           "type": "string"
         },
         {
+          "internalType": "string",
+          "name": "itemDescription",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "hashOfImage",
+          "type": "string"
+        },
+        {
           "internalType": "uint256",
           "name": "reservePrice",
           "type": "uint256"
@@ -244,6 +264,16 @@
             {
               "internalType": "string",
               "name": "itemName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "itemDescription",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "hashOfImage",
               "type": "string"
             },
             {
@@ -329,6 +359,16 @@
             {
               "internalType": "string",
               "name": "itemName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "itemDescription",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "hashOfImage",
               "type": "string"
             },
             {

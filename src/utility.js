@@ -23,4 +23,19 @@ export default {
     }
     return result;
   },
+
+  convertTimestamptoTime(end_time, cur_time) {
+    var timeDifference = end_time - cur_time;
+    var differenceDate = new Date(timeDifference);
+    var diffHours = differenceDate.getUTCHours().toString().padStart(2, "0");
+    var diffMinutes = differenceDate
+      .getUTCMinutes()
+      .toString()
+      .padStart(2, "0");
+    var diffSeconds = differenceDate
+      .getUTCSeconds()
+      .toString()
+      .padStart(2, "0");
+    return { hours: diffHours, minutes: diffMinutes, seconds: diffSeconds };
+  },
 };

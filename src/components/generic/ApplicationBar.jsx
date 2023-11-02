@@ -50,7 +50,13 @@ export default function ApplicationBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ bgcolor: "#555555" }}>
+      <AppBar
+        position="static"
+        sx={{
+          background:
+            "linear-gradient(135deg, #2b5876, #4e4376, #b5127c, #cf4b4b)",
+        }}
+      >
         <Toolbar>
           <MenuItem>
             <Typography
