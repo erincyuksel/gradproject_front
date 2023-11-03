@@ -30,7 +30,7 @@ function Auctions() {
       sx={{
         background:
           "linear-gradient(180deg, #151515, #1b1b1b, #1e1e1e, #272727, #2c2c2c, #303030, #333333, #363636, #363636, #333333, #303030, #2c2c2c, #272727, #1e1e1e, #1b1b1b, #151515)",
-        minHeight: window.innerHeight - 50,
+        minHeight: window.innerHeight,
       }}
     >
       {isConnected && (
@@ -48,12 +48,7 @@ function Auctions() {
         </Button>
       )}
 
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <Modal open={open} onClose={handleClose}>
         <>
           <CreateAuctionModal></CreateAuctionModal>
         </>
@@ -62,9 +57,20 @@ function Auctions() {
         {data && data[0].result
           ? data[0].result.map((auctionItem) => {
               return (
-                <Grid item xs={4}>
-                  <AuctionItem item={auctionItem}></AuctionItem>
-                </Grid>
+                <>
+                  <Grid item xs={4}>
+                    <AuctionItem item={auctionItem}></AuctionItem>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <AuctionItem item={auctionItem}></AuctionItem>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <AuctionItem item={auctionItem}></AuctionItem>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <AuctionItem item={auctionItem}></AuctionItem>
+                  </Grid>
+                </>
               );
             })
           : null}

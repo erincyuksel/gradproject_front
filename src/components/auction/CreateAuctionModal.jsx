@@ -24,7 +24,7 @@ export default function CreateAuctionModal() {
     left: "50%",
     transform: "translate(-50%, -50%)",
     width: 400,
-    bgcolor: "#eeeedd",
+    background: "linear-gradient(135deg, #2b5876, #4e4376, #b5127c, #cf4b4b)",
     border: "2px solid #000",
     boxShadow: 24,
     p: 4,

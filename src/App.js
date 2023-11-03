@@ -25,6 +25,8 @@ const config = createConfig({
 });
 
 function App() {
+  document.body.style.overflow = "auto";
+
   return (
     <WagmiConfig config={config}>
       <div className="App">

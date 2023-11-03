@@ -85,7 +85,6 @@ const ProfilePopover = () => {
     useContractWrite(myConfig3);
 
   const handlePopoverOpen = (event) => {
-    console.log(data);
     setAnchorEl(event.currentTarget);
     setStakeRequired(Number(BigInt(data[0].result) / BigInt(10 ** 18)));
     setPubkey(data[1].result);
@@ -137,23 +136,24 @@ const ProfilePopover = () => {
     approve()
       .then(async () => {
         await new Promise((r) => setTimeout(r, 1500));
-        setStakeTokensFunc().then(async () => {
-          setStakedAmount(tokensToStake);
-          setBalance(balance - tokensToStake);
-          enqueueSnackbar("Successfully staked required tokens!", {
-            variant: "success",
+        setStakeTokensFunc()
+          .then(async () => {
+            setStakedAmount(tokensToStake);
+            setBalance(balance - tokensToStake);
+            handleClosePopover();
+            enqueueSnackbar("Successfully staked required tokens!", {
+              variant: "success",
+            });
+          })
+          .catch((e) => {
+            enqueueSnackbar("Something went wrong!", { variant: "error" });
           });
-        });
       })
       .catch((e) => {
         console.log(e);
         enqueueSnackbar("Something went wrong!", { variant: "error" });
       });
   };
-
-  useEffect(() => {
-    setTokensToStake(stakeRequired - stakedAmount);
-  }, [stakeRequired]);
 
   return (
     <div>
@@ -222,16 +222,26 @@ const ProfilePopover = () => {
           <Typography sx={{ fontSize: "12px" }}>
             Public Key: {pubKey}
           </Typography>
-          <Button
-            variant="contained"
-            color="secondary"
-            fullWidth
-            style={{ marginTop: "16px", backgroundColor: "#2e5d4b" }}
-            onClick={handleSetStakeTokens}
-            disabled={!isStakeAllowed}
+          <div
+            style={{ display: "flex", alignItems: "center", marginTop: "16px" }}
           >
-            Stake Tokens
-          </Button>
+            <TextField
+              label="Stake Amount"
+              variant="outlined"
+              fullWidth
+              onChange={(e) => setTokensToStake(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              color="secondary"
+              fullWidth
+              style={{ marginLeft: "16px", backgroundColor: "#2e5d4b" }}
+              onClick={handleSetStakeTokens}
+              disabled={!isStakeAllowed}
+            >
+              Stake Tokens
+            </Button>
+          </div>
         </div>
       </Popover>
     </div>
