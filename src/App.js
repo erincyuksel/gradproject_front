@@ -4,6 +4,7 @@ import { Counter } from "./features/counter/Counter";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Auctions from "./pages/Auctions";
+import Proposals from "./pages/Proposals";
 import ApplicationBar from "./components/generic/ApplicationBar";
 import { publicProvider } from "wagmi/providers/public";
 import { WagmiConfig, createConfig, configureChains, mainnet } from "wagmi";
@@ -26,13 +27,15 @@ const config = createConfig({
 
 function App() {
   document.body.style.overflow = "auto";
-
   return (
     <WagmiConfig config={config}>
       <div className="App">
         <ApplicationBar></ApplicationBar>
         <Routes>
           <Route path="/" element={<Auctions />} />
+        </Routes>
+        <Routes>
+          <Route path="/proposals" element={<Proposals />} />
         </Routes>
       </div>
     </WagmiConfig>

@@ -58,6 +58,16 @@ export default function ApplicationBar() {
               Auctions
             </Typography>
           </MenuItem>
+          <MenuItem>
+            <Typography
+              variant="h6"
+              component="a"
+              sx={{ flexGrow: 1 }}
+              onClick={() => navigate("/proposals")}
+            >
+              Proposals
+            </Typography>
+          </MenuItem>
           {isConnected ? (
             <div style={{ marginLeft: "auto" }}>
               Connected to {ensName ?? address}
