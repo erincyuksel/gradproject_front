@@ -1,5 +1,5 @@
-import { Box, Button, Modal } from "@mui/material";
-import { useState } from "react";
+import { Box, Button, Modal, Grid } from "@mui/material";
+import { useState, useEffect } from "react";
 import {
   useAccount,
   useContractReads,
@@ -7,14 +7,30 @@ import {
   useContractWrite,
 } from "wagmi";
 import CreateProposalModal from "../components/proposals/CreateProposalModal";
-import { enqueueSnackbar } from "notistack";
-
+import { getPublicClient } from "@wagmi/core";
+import ProposalItem from "../components/proposals/ProposalItem";
+import governor from "../governor.json";
+import { parseAbiItem } from "viem";
 export default function Proposals() {
   const { address, isConnected } = useAccount();
   const [open, setOpen] = useState(false);
+  const [proposals, setProposals] = useState([]);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
+  useEffect(() => {
+    getPublicClient()
+      .getLogs({
+        address: governor.address,
+        event: parseAbiItem(
+          "event ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 voteStart, uint256 voteEnd, string description)"
+        ),
+        fromBlock: 0n,
+      })
+      .then((data) => {
+        console.log(data);
+        setProposals(data);
+      });
+  }, []);
   return (
     <Box
       sx={{
@@ -42,6 +58,16 @@ export default function Proposals() {
           <CreateProposalModal></CreateProposalModal>
         </>
       </Modal>
+      <Grid container spacing={2}>
+        {proposals &&
+          proposals.map((proposal) => {
+            return (
+              <Grid key={proposal.args.proposalId} item xs={4}>
+                <ProposalItem proposal={proposal.args}></ProposalItem>
+              </Grid>
+            );
+          })}
+      </Grid>
     </Box>
   );
 }

@@ -100,6 +100,9 @@ export default function CreateProposalModal() {
       args: [proposalField],
     });
     setEncodedFunction(data);
+    setProposalDescription(
+      proposalDescription + " - " + category + " - " + proposalField
+    );
   };
 
   const returnProposalField = () => {

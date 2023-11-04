@@ -5,6 +5,8 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@ethersproject/keccak256": "^5.7.0",
+    "@ethersproject/strings": "^5.7.0",
     "@mui/icons-material": "^5.14.15",
     "@mui/material": "^5.14.15",
     "@reduxjs/toolkit": "^1.9.7",
