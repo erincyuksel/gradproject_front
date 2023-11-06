@@ -55,7 +55,7 @@ export default function Proposals() {
       )}
       <Modal open={open} onClose={handleClose}>
         <>
-          <CreateProposalModal></CreateProposalModal>
+          <CreateProposalModal modalHandler={setOpen}></CreateProposalModal>
         </>
       </Modal>
       <Grid container spacing={2}>

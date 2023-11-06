@@ -21,6 +21,8 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { enqueueSnackbar } from "notistack";
 const ProfilePopover = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [concurrentAuctions, setConcurrentAuctions] = useState(2);
+  const [auctionDuration, setAuctionDuration] = useState(3600);
   const [pubKey, setPubkey] = useState("");
   const [stakedAmount, setStakedAmount] = useState(0);
   const [stakeRequired, setStakeRequired] = useState(0);
@@ -49,6 +51,8 @@ const ProfilePopover = () => {
       },
       { ...auction, functionName: "getActiveAuctioneer", args: [address] },
       { ...obscurity, functionName: "balanceOf", args: [address] },
+      { ...auction, functionName: "getAuctionDuration" },
+      { ...auction, functionName: "getConcurrentAuctionsPerUser" },
     ],
     watch: true,
   });
@@ -90,6 +94,9 @@ const ProfilePopover = () => {
     setPubkey(data[1].result);
     setStakedAmount(Number(BigInt(data[2].result[0]) / BigInt(10 ** 18)));
     setBalance(Number(BigInt(data[3].result) / BigInt(10 ** 18)));
+    console.log(Number(data[4].result));
+    setAuctionDuration(Number(data[4].result));
+    setConcurrentAuctions(Number(data[5].result));
     if (data[2].result[0] >= data[0].result) {
       setIsStakeAllowed(false);
     } else {
@@ -190,6 +197,10 @@ const ProfilePopover = () => {
           <Typography>Token Balance: {balance} OT</Typography>
           <Typography>Current Stake: {stakedAmount} OT</Typography>
           <Typography>Needed Stake Amount: {stakeRequired} OT</Typography>
+          <Typography>Auction Duration: {auctionDuration}</Typography>
+          <Typography>
+            Concurrent Auctions Per User: {concurrentAuctions}
+          </Typography>
 
           <div
             style={{ display: "flex", alignItems: "center", marginTop: "16px" }}

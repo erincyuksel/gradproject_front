@@ -57,20 +57,9 @@ function Auctions() {
         {data && data[0].result
           ? data[0].result.map((auctionItem) => {
               return (
-                <>
-                  <Grid item xs={4}>
-                    <AuctionItem item={auctionItem}></AuctionItem>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <AuctionItem item={auctionItem}></AuctionItem>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <AuctionItem item={auctionItem}></AuctionItem>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <AuctionItem item={auctionItem}></AuctionItem>
-                  </Grid>
-                </>
+                <Grid item xs={4}>
+                  <AuctionItem item={auctionItem}></AuctionItem>
+                </Grid>
               );
             })
           : null}

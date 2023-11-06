@@ -46,25 +46,29 @@ export default function AuctionItem(props) {
       setSecondRemaining(timeInfo.seconds);
     }, 1000);
     const imgRef = ref(storage, "images/" + props.item.hashOfImage);
-    getDownloadURL(imgRef).then((url) => {
-      setUrl(url);
-      const xhr = new XMLHttpRequest();
-      xhr.responseType = "blob";
-      xhr.onload = async (event) => {
-        const blob = xhr.response;
-        const buffer = await blob.arrayBuffer();
-        crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-          let hex = utility.toHexString(Array.from(new Uint8Array(hash)));
-          if (hex == props.item.hashOfImage) {
-            setIsGenuine(true);
-          } else {
-            setIsGenuine(false);
-          }
-        });
-      };
-      xhr.open("GET", url);
-      xhr.send();
-    });
+    getDownloadURL(imgRef)
+      .then((url) => {
+        setUrl(url);
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = "blob";
+        xhr.onload = async (event) => {
+          const blob = xhr.response;
+          const buffer = await blob.arrayBuffer();
+          crypto.subtle.digest("SHA-256", buffer).then((hash) => {
+            let hex = utility.toHexString(Array.from(new Uint8Array(hash)));
+            if (hex == props.item.hashOfImage) {
+              setIsGenuine(true);
+            } else {
+              setIsGenuine(false);
+            }
+          });
+        };
+        xhr.open("GET", url);
+        xhr.send();
+      })
+      .catch((e) => {
+        setIsGenuine(false);
+      });
   }, []);
 
   const { config: bidConfig } = usePrepareContractWrite({

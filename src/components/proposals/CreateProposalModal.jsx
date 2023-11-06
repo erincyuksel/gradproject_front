@@ -21,7 +21,7 @@ import {
 import { useDebounce } from "../../hooks/useDebounce";
 import { encodeFunctionData } from "viem";
 import { enqueueSnackbar } from "notistack";
-export default function CreateProposalModal() {
+export default function CreateProposalModal(props) {
   const style = {
     position: "absolute",
     top: "50%",
@@ -36,10 +36,14 @@ export default function CreateProposalModal() {
   const { isConnected, address } = useAccount();
 
   const [proposalDescription, setProposalDescription] = useState("");
+  const [finalProposalDescription, setFinalProposalDescription] = useState("");
   const [category, setCategory] = useState(0);
   const [encodedFunction, setEncodedFunction] = useState("");
 
-  const debouncedProposalDescription = useDebounce(proposalDescription, 500);
+  const debouncedFinalProposalDescription = useDebounce(
+    finalProposalDescription,
+    500
+  );
   const debouncedEncodedFunction = useDebounce(encodedFunction, 500);
 
   useContractEvent({
@@ -59,25 +63,34 @@ export default function CreateProposalModal() {
       [auction.address],
       [0],
       [debouncedEncodedFunction],
-      debouncedProposalDescription,
+      debouncedFinalProposalDescription,
     ],
     account: address,
+    enabled: Boolean(debouncedFinalProposalDescription),
   });
 
   const { writeAsync: createProposal } = useContractWrite(config);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    console.log(finalProposalDescription);
     createProposal()
       .then((val) => {
         console.log(val);
         enqueueSnackbar("Successfully created a proposal!", {
           variant: "success",
         });
+        props.modalHandler(false);
+        setProposalDescription("");
+        setFinalProposalDescription("");
+        setEncodedFunction("");
       })
       .catch((e) => {
         enqueueSnackbar("Something went wrong!", { variant: "error" });
+        props.modalHandler(false);
+        setProposalDescription("");
+        setFinalProposalDescription("");
+        setEncodedFunction("");
       });
   };
 
@@ -100,7 +113,7 @@ export default function CreateProposalModal() {
       args: [proposalField],
     });
     setEncodedFunction(data);
-    setProposalDescription(
+    setFinalProposalDescription(
       proposalDescription + " - " + category + " - " + proposalField
     );
   };
@@ -180,6 +193,7 @@ export default function CreateProposalModal() {
                   color="primary"
                   type="submit"
                   sx={{ bgcolor: "#2e5d4b" }}
+                  disabled={!Boolean(debouncedFinalProposalDescription)}
                 >
                   Propose
                 </Button>

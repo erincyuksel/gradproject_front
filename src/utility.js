@@ -25,17 +25,18 @@ export default {
   },
 
   convertTimestamptoTime(end_time, cur_time) {
-    var timeDifference = end_time - cur_time;
-    var differenceDate = new Date(timeDifference);
-    var diffHours = differenceDate.getUTCHours().toString().padStart(2, "0");
-    var diffMinutes = differenceDate
-      .getUTCMinutes()
-      .toString()
-      .padStart(2, "0");
-    var diffSeconds = differenceDate
-      .getUTCSeconds()
-      .toString()
-      .padStart(2, "0");
-    return { hours: diffHours, minutes: diffMinutes, seconds: diffSeconds };
+    // Calculate the time difference in milliseconds
+    const timeDifference = end_time - cur_time;
+
+    // Calculate hours, minutes, and seconds
+    let hours = Math.floor(timeDifference / 3600000); // 1 hour = 3600000 milliseconds
+    let minutes = Math.floor((timeDifference % 3600000) / 60000); // 1 minute = 60000 milliseconds
+    let seconds = Math.floor((timeDifference % 60000) / 1000); // 1 second = 1000 milliseconds
+
+    hours = hours.toString().padStart(2, "0");
+    minutes = minutes.toString().padStart(2, "0");
+    seconds = seconds.toString().padStart(2, "0");
+
+    return { hours: hours, minutes: minutes, seconds: seconds };
   },
 };
