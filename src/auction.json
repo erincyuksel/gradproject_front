@@ -581,6 +581,208 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "getMyBidAuctions",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "itemId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "itemName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "itemDescription",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "hashOfImage",
+              "type": "string"
+            },
+            {
+              "internalType": "address payable",
+              "name": "seller",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reservePrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "highestBid",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address payable",
+              "name": "highestBidder",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "auctionEndTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "ended",
+              "type": "bool"
+            },
+            {
+              "internalType": "string",
+              "name": "deliveryAddress",
+              "type": "string"
+            },
+            {
+              "internalType": "string[]",
+              "name": "privateChatLogs",
+              "type": "string[]"
+            },
+            {
+              "internalType": "string[]",
+              "name": "committeeChatLogs",
+              "type": "string[]"
+            },
+            {
+              "internalType": "enum Auction.EscrowState",
+              "name": "escrowState",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "yesVotes",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "noVotes",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Auction.AuctionItem[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "getMyOwnerAuctions",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "itemId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "itemName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "itemDescription",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "hashOfImage",
+              "type": "string"
+            },
+            {
+              "internalType": "address payable",
+              "name": "seller",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reservePrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "highestBid",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address payable",
+              "name": "highestBidder",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "auctionEndTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "ended",
+              "type": "bool"
+            },
+            {
+              "internalType": "string",
+              "name": "deliveryAddress",
+              "type": "string"
+            },
+            {
+              "internalType": "string[]",
+              "name": "privateChatLogs",
+              "type": "string[]"
+            },
+            {
+              "internalType": "string[]",
+              "name": "committeeChatLogs",
+              "type": "string[]"
+            },
+            {
+              "internalType": "enum Auction.EscrowState",
+              "name": "escrowState",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "yesVotes",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "noVotes",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Auction.AuctionItem[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "adr",
           "type": "address"
         }
@@ -636,6 +838,30 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerAuctions",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
         }
       ],
       "stateMutability": "view",

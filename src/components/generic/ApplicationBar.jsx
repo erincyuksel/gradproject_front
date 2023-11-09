@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import { MenuItem } from "@mui/material";
 import ProfilePopover from "../profile/ProfilePopover";
 import auction from "../../auction.json";
+import { useEffect } from "react";
 import {
   useAccount,
   useConnect,
@@ -19,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function ApplicationBar() {
   let navigate = useNavigate();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, connector: activeConnector } = useAccount();
   const { data: ensName } = useEnsName({ address });
   const { connect, connectors } = useConnect();
 
@@ -37,6 +38,23 @@ export default function ApplicationBar() {
       { ...auction, functionName: "getActiveAuctioneer" },
     ],
   });
+
+  useEffect(() => {
+    const handleConnectorUpdate = (account, chain) => {
+      if (account) {
+        console.log("new account", account);
+        window.location.reload(true);
+      } else if (chain) {
+        console.log("new chain", chain);
+        window.location.reload(true);
+      }
+    };
+
+    if (activeConnector) {
+      activeConnector.on("change", handleConnectorUpdate);
+    }
+    return () => activeConnector?.off("change", handleConnectorUpdate);
+  }, [activeConnector]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
