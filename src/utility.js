@@ -39,4 +39,9 @@ export default {
 
     return { hours: hours, minutes: minutes, seconds: seconds };
   },
+
+  didAuctionExpire(time1, time2) {
+    if (time2 >= time1) return true;
+    return false;
+  },
 };

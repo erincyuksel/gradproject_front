@@ -36,7 +36,19 @@ export default function AuctionItem(props) {
   const open = Boolean(anchorEl);
   useEffect(() => {
     const storage = getStorage();
-    setInterval(() => {
+    var countdown = setInterval(() => {
+      if (
+        utility.didAuctionExpire(
+          Number(props.item.auctionEndTime) * 1000,
+          Date.now()
+        )
+      ) {
+        setHourRemaining("00");
+        setMinuteRemaining("00");
+        setSecondRemaining("00");
+        clearInterval(countdown);
+        return;
+      }
       let timeInfo = utility.convertTimestamptoTime(
         Number(props.item.auctionEndTime) * 1000,
         Date.now()

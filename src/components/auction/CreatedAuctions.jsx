@@ -16,20 +16,58 @@ import utility from "../../utility";
 import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
+import { usePrepareContractWrite, useContractWrite, useAccount } from "wagmi";
+import auction from "../../auction.json";
+import { enqueueSnackbar } from "notistack";
 
 export default function CreatedAuctions(props) {
   const { children, value, index, item, ...other } = props;
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isGenuine, setIsGenuine] = useState(true);
   const [url, setUrl] = useState("");
   const [hourRemaining, setHourRemaining] = useState("00");
   const [minuteRemaining, setMinuteRemaining] = useState("00");
   const [secondRemaining, setSecondRemaining] = useState("00");
+  const [auctionEndable, setAuctionEndable] = useState(false);
+  const { address } = useAccount();
+
+  const { config: endAuctionConfig } = usePrepareContractWrite({
+    address: auction.address,
+    abi: auction.abi,
+    functionName: "endAuction",
+    args: [item.itemId],
+    account: address,
+  });
+
+  const { config: raiseDisputeConfig } = usePrepareContractWrite({
+    address: auction.address,
+    abi: auction.abi,
+    functionName: "raiseDispute",
+    args: [item.itemId],
+    account: address,
+  });
+
+  const { writeAsync: endAuction } = useContractWrite(endAuctionConfig);
+  const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
 
   useEffect(() => {
     const storage = getStorage();
     const imgRef = ref(storage, "images/" + props.item.hashOfImage);
-    setInterval(() => {
+    var countdown = setInterval(() => {
+      if (
+        utility.didAuctionExpire(
+          Number(props.item.auctionEndTime) * 1000,
+          Date.now()
+        )
+      ) {
+        setHourRemaining("00");
+        setMinuteRemaining("00");
+        setSecondRemaining("00");
+        if (!item.ended) {
+          setAuctionEndable(true);
+        }
+        clearInterval(countdown);
+        return;
+      }
       let timeInfo = utility.convertTimestamptoTime(
         Number(props.item.auctionEndTime) * 1000,
         Date.now()
@@ -62,6 +100,49 @@ export default function CreatedAuctions(props) {
         setIsGenuine(false);
       });
   }, []);
+
+  const handleEndAuction = () => {
+    endAuction()
+      .then(() => {
+        enqueueSnackbar("You have successfully ended the auction!", {
+          variant: "success",
+        });
+      })
+      .catch((e) => {
+        enqueueSnackbar("Something went wrong!", { variant: "error" });
+      });
+  };
+
+  const handleRaiseDispute = () => {
+    raiseDispute()
+      .then(() => {
+        enqueueSnackbar("You have successfully risen dispute!", {
+          variant: "success",
+        });
+      })
+      .catch((e) => {
+        enqueueSnackbar("Something went wrong!", { variant: "error" });
+      });
+  };
+
+  const getEscrowState = () => {
+    switch (item.escrowState) {
+      case 0:
+        return "Awaiting Delivery Address";
+      case 1:
+        return "Preparing Item";
+      case 2:
+        return "Item on Delivery";
+      case 3:
+        return "Item Received";
+      case 4:
+        return "Dispute";
+      case 5:
+        return "Dispute Resolved";
+      case 6:
+        return "Cancelled";
+    }
+  };
 
   return (
     <Box
@@ -148,6 +229,16 @@ export default function CreatedAuctions(props) {
                       {item.ended ? "ENDED" : "ONGOING"}
                     </Typography>
                   </Typography>
+                  <Typography variant="h5" hidden={!item.ended}>
+                    Escrow State:{" "}
+                    <Typography
+                      display="inline"
+                      variant="body1"
+                      fontSize="20px"
+                    >
+                      {getEscrowState()}
+                    </Typography>
+                  </Typography>
                   <Typography variant="h5">
                     Current Bid:{" "}
                     <Typography
@@ -190,36 +281,75 @@ export default function CreatedAuctions(props) {
                       )}
                     </div>
                   </div>
-                  <Box hidden={!item.ended}>
+                  <Grid item container justifyContent="center" spacing={2}>
+                    <Grid item>
+                      <Button
+                        variant={"contained"}
+                        color="primary"
+                        onClick={() => handleRaiseDispute()}
+                        disabled={!handleRaiseDispute}
+                        sx={{
+                          bgcolor: "#2e5d4b",
+                          marginTop: "5px",
+                          marginBottom: "5px",
+                          display:
+                            !item.ended || item.escrowState == 4
+                              ? "none"
+                              : "true",
+                        }}
+                      >
+                        Raise Dispute
+                      </Button>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant={"contained"}
+                        color="primary"
+                        sx={{
+                          bgcolor: "#2e5d4b",
+                          marginTop: "5px",
+                          marginBottom: "5px",
+                          display: !item.ended ? "none" : "true",
+                        }}
+                      >
+                        Chat with Winner
+                      </Button>
+                    </Grid>
                     <Grid item container justifyContent="center" spacing={2}>
                       <Grid item>
                         <Button
                           variant={"contained"}
                           color="primary"
+                          onClick={() => handleEndAuction()}
+                          disabled={!endAuction}
                           sx={{
                             bgcolor: "#2e5d4b",
                             marginTop: "5px",
                             marginBottom: "5px",
+                            display: !auctionEndable ? "none" : "true",
                           }}
                         >
-                          Raise Dispute
+                          End Auction
                         </Button>
                       </Grid>
                       <Grid item>
                         <Button
                           variant={"contained"}
                           color="primary"
+                          onClick={() => handleEndAuction()}
+                          disabled={!endAuction}
                           sx={{
                             bgcolor: "#2e5d4b",
                             marginTop: "5px",
                             marginBottom: "5px",
+                            display: !auctionEndable ? "none" : "true",
                           }}
                         >
-                          Chat with Winner
+                          End Auction
                         </Button>
                       </Grid>
                     </Grid>
-                  </Box>
+                  </Grid>
                 </CardContent>
               </Grid>
             </Grid>

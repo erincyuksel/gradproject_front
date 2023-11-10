@@ -74,7 +74,7 @@ const ProfilePopover = () => {
     account: address,
   });
 
-  const { config: myConfig3 } = usePrepareContractWrite({
+  const { refetch: fetchConfig3, config: myConfig3 } = usePrepareContractWrite({
     address: auction.address,
     abi: auction.abi,
     functionName: "stakeTokens",
@@ -142,6 +142,7 @@ const ProfilePopover = () => {
     console.log("asd");
     approve()
       .then(async () => {
+        await fetchConfig3();
         await new Promise((r) => setTimeout(r, 1500));
         setStakeTokensFunc()
           .then(async () => {
