@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useAccount, useContractReads } from "wagmi";
 import auction from "../auction.json";
 import CreatedAuctions from "../components/auction/CreatedAuctions";
+import BidAuctions from "../components/auction/BidAuctions";
 export default function MyAuctions() {
   const [value, setValue] = useState(0);
   const { isConnected, address } = useAccount();
@@ -22,6 +23,11 @@ export default function MyAuctions() {
       {
         ...auction,
         functionName: "getMyOwnerAuctions",
+        args: [address],
+      },
+      {
+        ...auction,
+        functionName: "getMyBidAuctions",
         args: [address],
       },
     ],
@@ -48,11 +54,7 @@ export default function MyAuctions() {
         indicatorColor="secondary"
         textColor="secondary"
       >
-        <Tab
-          label="Created Auctions"
-          sx={{ color: "white" }}
-          onClick={() => console.log(address)}
-        />
+        <Tab label="Created Auctions" sx={{ color: "white" }} />
         <Tab label="Bid Auctions" sx={{ color: "white" }} />
       </Tabs>
       {data && data[0].result
@@ -64,6 +66,18 @@ export default function MyAuctions() {
                 item={auctionItem}
                 onClick={() => console.log(data[0].result)}
               ></CreatedAuctions>
+            );
+          })
+        : null}
+      {data && data[1].result
+        ? data[1].result.map((auctionItem) => {
+            return (
+              <BidAuctions
+                value={value}
+                index={1}
+                item={auctionItem}
+                onClick={() => console.log(data[1].result)}
+              ></BidAuctions>
             );
           })
         : null}

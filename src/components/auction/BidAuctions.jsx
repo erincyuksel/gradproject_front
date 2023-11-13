@@ -9,6 +9,7 @@ import {
   Button,
   CardHeader,
   Tooltip,
+  TextField,
 } from "@mui/material";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
@@ -20,8 +21,8 @@ import { usePrepareContractWrite, useContractWrite, useAccount } from "wagmi";
 import auction from "../../auction.json";
 import { enqueueSnackbar } from "notistack";
 import ChatModal from "../generic/ChatModal";
-
-export default function CreatedAuctions(props) {
+import DeliveryAddressPopover from "./DeliveryAddressPopover";
+export default function BidAuctions(props) {
   const { children, value, index, item, ...other } = props;
   const [isGenuine, setIsGenuine] = useState(true);
   const [url, setUrl] = useState("");
@@ -30,6 +31,7 @@ export default function CreatedAuctions(props) {
   const [secondRemaining, setSecondRemaining] = useState("00");
   const [auctionEndable, setAuctionEndable] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const { address } = useAccount();
 
   const { config: endAuctionConfig } = usePrepareContractWrite({
@@ -153,6 +155,14 @@ export default function CreatedAuctions(props) {
       case 6:
         return "Cancelled";
     }
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -327,11 +337,30 @@ export default function CreatedAuctions(props) {
                         Chat with Winner
                       </Button>
                     </Grid>
+                    <Grid item>
+                      <Button
+                        variant={"contained"}
+                        color="primary"
+                        onClick={handleClick}
+                        sx={{
+                          bgcolor: "#2e5d4b",
+                          marginTop: "5px",
+                          marginBottom: "5px",
+                        }}
+                      >
+                        Send Address
+                      </Button>
+                    </Grid>
+                    <DeliveryAddressPopover
+                      open={Boolean(anchorEl)}
+                      anchorEl={anchorEl}
+                      onClose={handleClose}
+                    ></DeliveryAddressPopover>
                     <ChatModal
                       isOpen={isChatModalOpen}
                       onClose={handleChatModalClose}
                       itemId={props.item.itemId}
-                      pubKeyAddress={props.item.highestBidder}
+                      pubKeyAddress={props.item.seller}
                     ></ChatModal>
                     <Grid item container justifyContent="center" spacing={2}>
                       <Grid item>

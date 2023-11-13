@@ -44,4 +44,26 @@ export default {
     if (time2 >= time1) return true;
     return false;
   },
+
+  isHex(str) {
+    if (!str) return false;
+    if (str[0] == 0 && str[1] == "x") {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  returnFormattedTime(unixTimestamp) {
+    const date = new Date(Number(unixTimestamp)); // Convert seconds to milliseconds
+    console.log(date);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is zero-based
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}`;
+
+    return formattedDateTime;
+  },
 };
