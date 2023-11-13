@@ -19,6 +19,7 @@ import auction from "../../auction.json";
 import obscurity from "../../obscurity.json";
 import { useDebounce } from "../../hooks/useDebounce";
 import { enqueueSnackbar } from "notistack";
+import { writeContract } from "@wagmi/core";
 const ProfilePopover = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [concurrentAuctions, setConcurrentAuctions] = useState(2);
@@ -74,19 +75,9 @@ const ProfilePopover = () => {
     account: address,
   });
 
-  const { refetch: fetchConfig3, config: myConfig3 } = usePrepareContractWrite({
-    address: auction.address,
-    abi: auction.abi,
-    functionName: "stakeTokens",
-    args: [BigInt(debouncedTokensToStake * 10 ** 18)],
-    account: address,
-  });
-
   const { data: data1, writeAsync: setPubKeyFunc } =
     useContractWrite(myConfig1);
   const { data: data2, writeAsync: approve } = useContractWrite(myConfig2);
-  const { data: data3, writeAsync: setStakeTokensFunc } =
-    useContractWrite(myConfig3);
 
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -142,9 +133,14 @@ const ProfilePopover = () => {
     console.log("asd");
     approve()
       .then(async () => {
-        await fetchConfig3();
         await new Promise((r) => setTimeout(r, 1500));
-        setStakeTokensFunc()
+        await writeContract({
+          address: auction.address,
+          abi: auction.abi,
+          functionName: "stakeTokens",
+          args: [BigInt(debouncedTokensToStake * 10 ** 18)],
+          account: address,
+        })
           .then(async () => {
             setStakedAmount(tokensToStake);
             setBalance(balance - tokensToStake);
