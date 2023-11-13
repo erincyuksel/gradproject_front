@@ -90,10 +90,10 @@ const ProfilePopover = () => {
 
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
-    setStakeRequired(Number(BigInt(data[0].result) / BigInt(10 ** 18)));
+    setStakeRequired(Number(data[0].result) / 10 ** 18);
     setPubkey(data[1].result);
     setStakedAmount(Number(data[2].result[0]) / 10 ** 18);
-    setBalance(Number(BigInt(data[3].result) / BigInt(10 ** 18)));
+    setBalance(Number(data[3].result) / 10 ** 18);
     console.log(Number(data[4].result));
     setAuctionDuration(Number(data[4].result));
     setConcurrentAuctions(Number(data[5].result));

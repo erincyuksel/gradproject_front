@@ -267,8 +267,7 @@ export default function BidAuctions(props) {
                       variant="body1"
                       fontSize="20px"
                     >
-                      {Number(BigInt(item.highestBid) / BigInt(10 ** 18))}{" "}
-                      {" OT"}
+                      {Number(item.highestBid) / 10 ** 18} {" OT"}
                     </Typography>
                   </Typography>
                   <Typography variant="h5">
