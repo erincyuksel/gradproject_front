@@ -60,12 +60,14 @@ export default function MyAuctions() {
       {data && data[0].result
         ? data[0].result.map((auctionItem) => {
             return (
-              <CreatedAuctions
-                value={value}
-                index={0}
-                item={auctionItem}
-                onClick={() => console.log(data[0].result)}
-              ></CreatedAuctions>
+              <>
+                <CreatedAuctions
+                  value={value}
+                  index={0}
+                  item={auctionItem}
+                  onClick={() => console.log(data[0].result)}
+                ></CreatedAuctions>
+              </>
             );
           })
         : null}

@@ -9,7 +9,6 @@ import {
   Button,
   CardHeader,
   Tooltip,
-  TextField,
 } from "@mui/material";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
@@ -18,6 +17,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
 import { usePrepareContractWrite, useContractWrite, useAccount } from "wagmi";
+import { prepareWriteContract, writeContract } from "@wagmi/core";
 import auction from "../../auction.json";
 import { enqueueSnackbar } from "notistack";
 import ChatModal from "../generic/ChatModal";
@@ -31,6 +31,7 @@ export default function BidAuctions(props) {
   const [secondRemaining, setSecondRemaining] = useState("00");
   const [auctionEndable, setAuctionEndable] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [isTransitionable, setIsTransitionable] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { address } = useAccount();
 
@@ -52,6 +53,10 @@ export default function BidAuctions(props) {
 
   const { writeAsync: endAuction } = useContractWrite(endAuctionConfig);
   const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
+
+  useEffect(() => {
+    setIsTransitionable(checkIfTransitionable(item.escrowState));
+  }, []);
 
   useEffect(() => {
     const storage = getStorage();
@@ -165,6 +170,45 @@ export default function BidAuctions(props) {
     setAnchorEl(null);
   };
 
+  const checkIfTransitionable = (currentState) => {
+    if (currentState == 0 || currentState == 2) return true;
+    else return false;
+  };
+
+  const handleTransition = async () => {
+    try {
+      let nextEscrowState = 0;
+      switch (item.escrowState) {
+        case 0: {
+          nextEscrowState = 1;
+          break;
+        }
+        case 1: {
+          nextEscrowState = 2;
+          break;
+        }
+        case 2: {
+          nextEscrowState = 3;
+          break;
+        }
+      }
+      const { request } = await prepareWriteContract({
+        address: auction.address,
+        abi: auction.abi,
+        functionName: "transitionEscrowState",
+        args: [item.itemId, nextEscrowState],
+      });
+      await writeContract(request);
+      setIsTransitionable(checkIfTransitionable(nextEscrowState + 1));
+      enqueueSnackbar("Successfully transitioned escrow process", {
+        variant: "success",
+      });
+    } catch (e) {
+      enqueueSnackbar(e.toString(), { variant: "error" });
+      console.log(e);
+    }
+  };
+
   return (
     <Box
       role="tabpanel"
@@ -181,7 +225,7 @@ export default function BidAuctions(props) {
               margin: "auto",
             }}
           >
-            <Grid item container alignItems="center" justify="center">
+            <Grid container>
               <Grid item xs={12} sm={4}>
                 <CardHeader
                   sx={{
@@ -229,58 +273,36 @@ export default function BidAuctions(props) {
                   <Typography variant="h3" component="div">
                     {item.itemName}
                   </Typography>
-                  <Typography variant="h5">
-                    Item Description:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                      sx={{ wordBreak: "break-word" }}
-                    >
-                      {item.itemDescription}
+                  <div
+                    style={{ marginBottom: "15px", wordBreak: "break-word" }}
+                  >
+                    <Typography variant="h5">
+                      Item Description: {item.itemDescription}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5">
-                    Auction State:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {item.ended ? "ENDED" : "ONGOING"}
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
+                    <Typography variant="h5">
+                      Auction State: {item.ended ? "ENDED" : "ONGOING"}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5" hidden={!item.ended}>
-                    Escrow State:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {getEscrowState()}
+                  </div>
+                  {item.ended && (
+                    <div style={{ marginBottom: "15px" }}>
+                      <Typography variant="h5">
+                        Escrow State: {getEscrowState()}
+                      </Typography>
+                    </div>
+                  )}
+                  <div style={{ marginBottom: "15px" }}>
+                    <Typography variant="h5">
+                      Current Bid: {Number(item.highestBid) / 10 ** 18} {" OT"}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5">
-                    Current Bid:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {Number(item.highestBid) / 10 ** 18} {" OT"}
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
+                    <Typography variant="h5">
+                      Highest Bidder: {item.highestBidder}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5">
-                    Highest Bidder:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {item.highestBidder}
-                    </Typography>
-                  </Typography>
-                  <div>
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
                     <Typography variant="h5" display="inline">
                       Genuinity:{" "}
                     </Typography>
@@ -301,7 +323,7 @@ export default function BidAuctions(props) {
                       )}
                     </div>
                   </div>
-                  <Grid item container justifyContent="center" spacing={2}>
+                  <Grid container justifyContent="center" spacing={2}>
                     <Grid item>
                       <Button
                         variant={"contained"}
@@ -312,8 +334,9 @@ export default function BidAuctions(props) {
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",
                           marginBottom: "5px",
+                          width: "200px",
                           display:
-                            !item.ended || item.escrowState == 4
+                            !item.ended || item.escrowState === 4
                               ? "none"
                               : "true",
                         }}
@@ -329,6 +352,7 @@ export default function BidAuctions(props) {
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",
                           marginBottom: "5px",
+                          width: "200px",
                           display: !item.ended ? "none" : "true",
                         }}
                         onClick={handleChatModalOpen}
@@ -336,24 +360,12 @@ export default function BidAuctions(props) {
                         Chat with Winner
                       </Button>
                     </Grid>
-                    <Grid item>
-                      <Button
-                        variant={"contained"}
-                        color="primary"
-                        onClick={handleClick}
-                        sx={{
-                          bgcolor: "#2e5d4b",
-                          marginTop: "5px",
-                          marginBottom: "5px",
-                        }}
-                      >
-                        Send Address
-                      </Button>
-                    </Grid>
                     <DeliveryAddressPopover
                       open={Boolean(anchorEl)}
                       anchorEl={anchorEl}
                       onClose={handleClose}
+                      itemId={item.itemId}
+                      pubKeyAddress={props.item.seller}
                     ></DeliveryAddressPopover>
                     <ChatModal
                       isOpen={isChatModalOpen}
@@ -361,7 +373,7 @@ export default function BidAuctions(props) {
                       itemId={props.item.itemId}
                       pubKeyAddress={props.item.seller}
                     ></ChatModal>
-                    <Grid item container justifyContent="center" spacing={2}>
+                    <Grid container justifyContent="center" spacing={2}>
                       <Grid item>
                         <Button
                           variant={"contained"}
@@ -372,10 +384,42 @@ export default function BidAuctions(props) {
                             bgcolor: "#2e5d4b",
                             marginTop: "5px",
                             marginBottom: "5px",
+                            width: "200px",
                             display: !auctionEndable ? "none" : "true",
                           }}
                         >
                           End Auction
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant={"contained"}
+                          color="primary"
+                          onClick={handleClick}
+                          sx={{
+                            bgcolor: "#2e5d4b",
+                            marginTop: "5px",
+                            marginBottom: "5px",
+                            width: "200px",
+                          }}
+                        >
+                          Send Address
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant={"contained"}
+                          color="primary"
+                          onClick={handleTransition}
+                          disabled={!isTransitionable}
+                          sx={{
+                            bgcolor: "#2e5d4b",
+                            marginTop: "5px",
+                            marginBottom: "5px",
+                            width: "200px",
+                          }}
+                        >
+                          Transition Escrow
                         </Button>
                       </Grid>
                     </Grid>

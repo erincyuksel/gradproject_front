@@ -73,18 +73,22 @@ const ChatModal = ({ isOpen, onClose, itemId, pubKeyAddress }) => {
   };
 
   useEffect(() => {
-    setEncryptionKey(data[1].result);
-    setMessages([]);
-    const tempArr = data[0].result.map((msg) => {
-      let elements = msg.split("-");
-      let date = elements[0];
-      let sender = elements[1];
-      let encryptedMsg = elements[2];
-      if (sender == address) sender = "You";
+    if (data && data[1]) {
+      setEncryptionKey(data[1].result);
+    }
+    if (data && data[0]) {
+      setMessages([]);
+      const tempArr = data[0].result.map((msg) => {
+        let elements = msg.split("-");
+        let date = elements[0];
+        let sender = elements[1];
+        let encryptedMsg = elements[2];
+        if (sender == address) sender = "You";
 
-      return { date: date, sender: sender, text: encryptedMsg };
-    });
-    setMessages(tempArr);
+        return { date: date, sender: sender, text: encryptedMsg };
+      });
+      setMessages(tempArr);
+    }
   }, data);
 
   const handleDecryption = async (msg, index) => {

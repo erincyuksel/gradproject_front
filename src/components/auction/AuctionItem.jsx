@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import { Grid } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import CardMedia from "@mui/material/CardMedia";
 import { CardHeader } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -175,9 +175,20 @@ export default function AuctionItem(props) {
                 horizontal: "left",
               }}
             >
-              <Typography sx={{ p: 2 }}>
-                {props.item.itemDescription}
-              </Typography>
+              <Box
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  width: "400px",
+                  wordWrap: "break-word",
+                  background:
+                    "linear-gradient(to right bottom, #430089, #82ffa1)",
+                }}
+              >
+                <Typography sx={{ p: 2 }}>
+                  {props.item.itemDescription}
+                </Typography>
+              </Box>
             </Popover>
           </div>
         }

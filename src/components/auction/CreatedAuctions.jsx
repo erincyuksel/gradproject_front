@@ -9,6 +9,7 @@ import {
   Button,
   CardHeader,
   Tooltip,
+  Popover,
 } from "@mui/material";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
@@ -20,9 +21,11 @@ import { usePrepareContractWrite, useContractWrite, useAccount } from "wagmi";
 import auction from "../../auction.json";
 import { enqueueSnackbar } from "notistack";
 import ChatModal from "../generic/ChatModal";
+import { prepareWriteContract, writeContract } from "@wagmi/core";
 
 export default function CreatedAuctions(props) {
   const { children, value, index, item, ...other } = props;
+  const [anchorEl, setAnchorEl] = useState(null);
   const [isGenuine, setIsGenuine] = useState(true);
   const [url, setUrl] = useState("");
   const [hourRemaining, setHourRemaining] = useState("00");
@@ -30,6 +33,10 @@ export default function CreatedAuctions(props) {
   const [secondRemaining, setSecondRemaining] = useState("00");
   const [auctionEndable, setAuctionEndable] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [isTransitionable, setIsTransitionable] = useState(false);
+
+  const open = Boolean(anchorEl);
   const { address } = useAccount();
 
   const { config: endAuctionConfig } = usePrepareContractWrite({
@@ -50,6 +57,10 @@ export default function CreatedAuctions(props) {
 
   const { writeAsync: endAuction } = useContractWrite(endAuctionConfig);
   const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
+
+  useEffect(() => {
+    setIsTransitionable(checkIfTransitionable(item.escrowState));
+  }, []);
 
   useEffect(() => {
     const storage = getStorage();
@@ -155,6 +166,76 @@ export default function CreatedAuctions(props) {
     }
   };
 
+  const handleClick = async (event) => {
+    let target = event.currentTarget;
+    if (item.deliveryAddress) {
+      await window.ethereum
+        .request({
+          method: "eth_decrypt",
+          params: [item.deliveryAddress, address],
+        })
+        .then(async (value) => {
+          setDeliveryAddress(value);
+          setAnchorEl(target);
+          enqueueSnackbar("Successfully decrypted the delivery address!", {
+            variant: "success",
+          });
+        })
+        .catch((e) => {
+          enqueueSnackbar("There was a problem during decryption!", {
+            variant: "error",
+          });
+        });
+    } else {
+      enqueueSnackbar("No address submitted by the winner yet.", {
+        variant: "error",
+      });
+    }
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const checkIfTransitionable = (currentState) => {
+    if (currentState == 1) return true;
+    else return false;
+  };
+
+  const handleTransition = async () => {
+    try {
+      let nextEscrowState = 0;
+      switch (item.escrowState) {
+        case 0: {
+          nextEscrowState = 1;
+          break;
+        }
+        case 1: {
+          nextEscrowState = 2;
+          break;
+        }
+        case 2: {
+          nextEscrowState = 3;
+          break;
+        }
+      }
+      const { request } = await prepareWriteContract({
+        address: auction.address,
+        abi: auction.abi,
+        functionName: "transitionEscrowState",
+        args: [item.itemId, nextEscrowState],
+      });
+      await writeContract(request);
+      setIsTransitionable(checkIfTransitionable(nextEscrowState + 1));
+      enqueueSnackbar("Successfully transitioned escrow process", {
+        variant: "success",
+      });
+    } catch (e) {
+      enqueueSnackbar(e.toString(), { variant: "error" });
+      console.log(e);
+    }
+  };
+
   return (
     <Box
       role="tabpanel"
@@ -171,7 +252,7 @@ export default function CreatedAuctions(props) {
               margin: "auto",
             }}
           >
-            <Grid item container alignItems="center" justify="center">
+            <Grid container>
               <Grid item xs={12} sm={4}>
                 <CardHeader
                   sx={{
@@ -219,58 +300,34 @@ export default function CreatedAuctions(props) {
                   <Typography variant="h3" component="div">
                     {item.itemName}
                   </Typography>
-                  <Typography variant="h5">
-                    Item Description:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                      sx={{ wordBreak: "break-word" }}
-                    >
-                      {item.itemDescription}
+                  <div style={{ marginBottom: "15px", wordWrap: "break-word" }}>
+                    <Typography variant="h5">
+                      Item Description: {item.itemDescription}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5">
-                    Auction State:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {item.ended ? "ENDED" : "ONGOING"}
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
+                    <Typography variant="h5">
+                      Auction State: {item.ended ? "ENDED" : "ONGOING"}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5" hidden={!item.ended}>
-                    Escrow State:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {getEscrowState()}
+                  </div>
+                  {item.ended && (
+                    <div style={{ marginBottom: "15px" }}>
+                      <Typography variant="h5">
+                        Escrow State: {getEscrowState()}
+                      </Typography>
+                    </div>
+                  )}
+                  <div style={{ marginBottom: "15px" }}>
+                    <Typography variant="h5">
+                      Current Bid: {Number(item.highestBid) / 10 ** 18} {" OT"}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5">
-                    Current Bid:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {Number(item.highestBid) / 10 ** 18} {" OT"}
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
+                    <Typography variant="h5">
+                      Highest Bidder: {item.highestBidder}
                     </Typography>
-                  </Typography>
-                  <Typography variant="h5">
-                    Highest Bidder:{" "}
-                    <Typography
-                      display="inline"
-                      variant="body1"
-                      fontSize="20px"
-                    >
-                      {item.highestBidder}
-                    </Typography>
-                  </Typography>
-                  <div>
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
                     <Typography variant="h5" display="inline">
                       Genuinity:{" "}
                     </Typography>
@@ -291,7 +348,7 @@ export default function CreatedAuctions(props) {
                       )}
                     </div>
                   </div>
-                  <Grid item container justifyContent="center" spacing={2}>
+                  <Grid container justifyContent="center" spacing={2}>
                     <Grid item>
                       <Button
                         variant={"contained"}
@@ -302,8 +359,9 @@ export default function CreatedAuctions(props) {
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",
                           marginBottom: "5px",
+                          width: "200px",
                           display:
-                            !item.ended || item.escrowState == 4
+                            !item.ended || item.escrowState === 4
                               ? "none"
                               : "true",
                         }}
@@ -320,6 +378,7 @@ export default function CreatedAuctions(props) {
                           marginTop: "5px",
                           marginBottom: "5px",
                           display: !item.ended ? "none" : "true",
+                          width: "200px",
                         }}
                         onClick={handleChatModalOpen}
                       >
@@ -332,7 +391,7 @@ export default function CreatedAuctions(props) {
                       itemId={props.item.itemId}
                       pubKeyAddress={props.item.highestBidder}
                     ></ChatModal>
-                    <Grid item container justifyContent="center" spacing={2}>
+                    <Grid container justifyContent="center" spacing={2}>
                       <Grid item>
                         <Button
                           variant={"contained"}
@@ -343,10 +402,67 @@ export default function CreatedAuctions(props) {
                             bgcolor: "#2e5d4b",
                             marginTop: "5px",
                             marginBottom: "5px",
+                            width: "200px",
                             display: !auctionEndable ? "none" : "true",
                           }}
                         >
                           End Auction
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant={"contained"}
+                          color="primary"
+                          onClick={(e) => handleClick(e)}
+                          sx={{
+                            bgcolor: "#2e5d4b",
+                            marginTop: "5px",
+                            marginBottom: "5px",
+                            width: "200px",
+                            display: !item.ended ? "none" : "true",
+                          }}
+                        >
+                          Reveal Address
+                        </Button>
+                      </Grid>
+                      <Popover
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handleClose}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "left",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            width: "300px",
+                            wordWrap: "break-word",
+                            background:
+                              "linear-gradient(to right bottom, #430089, #82ffa1)",
+                          }}
+                        >
+                          <Typography sx={{ p: 2 }}>
+                            {deliveryAddress}
+                          </Typography>
+                        </Box>
+                      </Popover>
+                      <Grid item>
+                        <Button
+                          variant={"contained"}
+                          color="primary"
+                          onClick={handleTransition}
+                          disabled={!isTransitionable}
+                          sx={{
+                            bgcolor: "#2e5d4b",
+                            marginTop: "5px",
+                            marginBottom: "5px",
+                            width: "200px",
+                          }}
+                        >
+                          Transition Escrow
                         </Button>
                       </Grid>
                     </Grid>
