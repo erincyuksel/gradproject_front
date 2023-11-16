@@ -61,7 +61,10 @@ const ChatModal = ({ isOpen, onClose, itemId, pubKeyAddress }) => {
         enqueueSnackbar("Successfully sent the message!", {
           variant: "success",
         });
-        setMessages([...messages, { text: encryptedMsg, sender: "user" }]);
+        setMessages([
+          ...messages,
+          { date: date, text: encryptedMsg, sender: "You" },
+        ]);
         setMessage("");
       })
       .catch((e) => {
@@ -73,10 +76,10 @@ const ChatModal = ({ isOpen, onClose, itemId, pubKeyAddress }) => {
   };
 
   useEffect(() => {
-    if (data && data[1]) {
+    if (data && data[1] && data[1].result) {
       setEncryptionKey(data[1].result);
     }
-    if (data && data[0]) {
+    if (data && data[0] && data[0].result) {
       setMessages([]);
       const tempArr = data[0].result.map((msg) => {
         let elements = msg.split("-");

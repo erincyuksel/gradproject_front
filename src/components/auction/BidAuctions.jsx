@@ -21,6 +21,7 @@ import { prepareWriteContract, writeContract } from "@wagmi/core";
 import auction from "../../auction.json";
 import { enqueueSnackbar } from "notistack";
 import ChatModal from "../generic/ChatModal";
+import CommitteeChatModal from "../generic/CommitteeChatModal";
 import DeliveryAddressPopover from "./DeliveryAddressPopover";
 export default function BidAuctions(props) {
   const { children, value, index, item, ...other } = props;
@@ -31,6 +32,7 @@ export default function BidAuctions(props) {
   const [secondRemaining, setSecondRemaining] = useState("00");
   const [auctionEndable, setAuctionEndable] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [isCommitteeChatModalOpen, setCommitteeChatModalOpen] = useState(false);
   const [isTransitionable, setIsTransitionable] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { address } = useAccount();
@@ -55,6 +57,7 @@ export default function BidAuctions(props) {
   const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
 
   useEffect(() => {
+    console.log(item.escrowState);
     setIsTransitionable(checkIfTransitionable(item.escrowState));
   }, []);
 
@@ -143,6 +146,14 @@ export default function BidAuctions(props) {
     setChatModalOpen(false);
   };
 
+  const handleCommitteeChatModalOpen = () => {
+    setCommitteeChatModalOpen(true);
+  };
+
+  const handleCommitteeChatModalClose = () => {
+    setCommitteeChatModalOpen(false);
+  };
+
   const getEscrowState = () => {
     switch (item.escrowState) {
       case 0:
@@ -171,6 +182,7 @@ export default function BidAuctions(props) {
   };
 
   const checkIfTransitionable = (currentState) => {
+    if (!item.ended) return false;
     if (currentState == 0 || currentState == 2) return true;
     else return false;
   };
@@ -323,8 +335,22 @@ export default function BidAuctions(props) {
                       )}
                     </div>
                   </div>
-                  <Grid container justifyContent="center" spacing={2}>
-                    <Grid item>
+                  <Grid
+                    container
+                    justifyContent="center"
+                    spacing={2}
+                    margin="auto"
+                  >
+                    <Grid
+                      item
+                      component={Box}
+                      sx={{
+                        display:
+                          !item.ended || item.escrowState === 4
+                            ? "none"
+                            : "true",
+                      }}
+                    >
                       <Button
                         variant={"contained"}
                         color="primary"
@@ -335,16 +361,24 @@ export default function BidAuctions(props) {
                           marginTop: "5px",
                           marginBottom: "5px",
                           width: "200px",
-                          display:
-                            !item.ended || item.escrowState === 4
-                              ? "none"
-                              : "true",
                         }}
                       >
                         Raise Dispute
                       </Button>
                     </Grid>
-                    <Grid item>
+                    <Grid
+                      item
+                      component={Box}
+                      sx={{
+                        display:
+                          !item.ended ||
+                          item.escrowState == 4 ||
+                          item.escrowState == 5 ||
+                          item.escrowState == 6
+                            ? "none"
+                            : "true",
+                      }}
+                    >
                       <Button
                         variant={"contained"}
                         color="primary"
@@ -353,11 +387,38 @@ export default function BidAuctions(props) {
                           marginTop: "5px",
                           marginBottom: "5px",
                           width: "200px",
-                          display: !item.ended ? "none" : "true",
                         }}
                         onClick={handleChatModalOpen}
                       >
-                        Chat with Winner
+                        Chat with Owner
+                      </Button>
+                    </Grid>
+                    <Grid
+                      item
+                      component={Box}
+                      sx={{
+                        display:
+                          !item.ended ||
+                          item.escrowState == 0 ||
+                          item.escrowState == 1 ||
+                          item.escrowState == 2 ||
+                          item.escrowState == 3
+                            ? "none"
+                            : "true",
+                      }}
+                    >
+                      <Button
+                        variant={"contained"}
+                        color="primary"
+                        sx={{
+                          bgcolor: "#2e5d4b",
+                          marginTop: "5px",
+                          marginBottom: "5px",
+                          width: "200px",
+                        }}
+                        onClick={handleCommitteeChatModalOpen}
+                      >
+                        Committee Chat
                       </Button>
                     </Grid>
                     <DeliveryAddressPopover
@@ -373,8 +434,24 @@ export default function BidAuctions(props) {
                       itemId={props.item.itemId}
                       pubKeyAddress={props.item.seller}
                     ></ChatModal>
-                    <Grid container justifyContent="center" spacing={2}>
-                      <Grid item>
+                    <CommitteeChatModal
+                      isOpen={isCommitteeChatModalOpen}
+                      onClose={handleCommitteeChatModalClose}
+                      itemId={props.item.itemId}
+                      yesVotes={props.item.yesVotes} // buyer is right
+                      noVotes={props.item.noVotes} // seller is right
+                    ></CommitteeChatModal>
+                    <Grid
+                      container
+                      justifyContent="center"
+                      spacing={2}
+                      margin="auto"
+                    >
+                      <Grid
+                        item
+                        component={Box}
+                        sx={{ display: !auctionEndable ? "none" : "true" }}
+                      >
                         <Button
                           variant={"contained"}
                           color="primary"
@@ -385,7 +462,6 @@ export default function BidAuctions(props) {
                             marginTop: "5px",
                             marginBottom: "5px",
                             width: "200px",
-                            display: !auctionEndable ? "none" : "true",
                           }}
                         >
                           End Auction

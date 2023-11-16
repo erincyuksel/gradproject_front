@@ -21,6 +21,7 @@ import { usePrepareContractWrite, useContractWrite, useAccount } from "wagmi";
 import auction from "../../auction.json";
 import { enqueueSnackbar } from "notistack";
 import ChatModal from "../generic/ChatModal";
+import CommitteeChatModal from "../generic/CommitteeChatModal";
 import { prepareWriteContract, writeContract } from "@wagmi/core";
 
 export default function CreatedAuctions(props) {
@@ -28,6 +29,7 @@ export default function CreatedAuctions(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isGenuine, setIsGenuine] = useState(true);
   const [url, setUrl] = useState("");
+  const [isCommitteeChatModalOpen, setCommitteeChatModalOpen] = useState(false);
   const [hourRemaining, setHourRemaining] = useState("00");
   const [minuteRemaining, setMinuteRemaining] = useState("00");
   const [secondRemaining, setSecondRemaining] = useState("00");
@@ -37,6 +39,7 @@ export default function CreatedAuctions(props) {
   const [isTransitionable, setIsTransitionable] = useState(false);
 
   const open = Boolean(anchorEl);
+
   const { address } = useAccount();
 
   const { config: endAuctionConfig } = usePrepareContractWrite({
@@ -59,6 +62,7 @@ export default function CreatedAuctions(props) {
   const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
 
   useEffect(() => {
+    console.log(item.escrowState);
     setIsTransitionable(checkIfTransitionable(item.escrowState));
   }, []);
 
@@ -147,6 +151,14 @@ export default function CreatedAuctions(props) {
     setChatModalOpen(false);
   };
 
+  const handleCommitteeChatModalOpen = () => {
+    setCommitteeChatModalOpen(true);
+  };
+
+  const handleCommitteeChatModalClose = () => {
+    setCommitteeChatModalOpen(false);
+  };
+
   const getEscrowState = () => {
     switch (item.escrowState) {
       case 0:
@@ -198,6 +210,7 @@ export default function CreatedAuctions(props) {
   };
 
   const checkIfTransitionable = (currentState) => {
+    if (!item.ended) return false;
     if (currentState == 1) return true;
     else return false;
   };
@@ -348,8 +361,22 @@ export default function CreatedAuctions(props) {
                       )}
                     </div>
                   </div>
-                  <Grid container justifyContent="center" spacing={2}>
-                    <Grid item>
+                  <Grid
+                    container
+                    justifyContent="center"
+                    spacing={2}
+                    margin="auto"
+                  >
+                    <Grid
+                      item
+                      component={Box}
+                      sx={{
+                        display:
+                          !item.ended || item.escrowState === 4
+                            ? "none"
+                            : "true",
+                      }}
+                    >
                       <Button
                         variant={"contained"}
                         color="primary"
@@ -360,16 +387,24 @@ export default function CreatedAuctions(props) {
                           marginTop: "5px",
                           marginBottom: "5px",
                           width: "200px",
-                          display:
-                            !item.ended || item.escrowState === 4
-                              ? "none"
-                              : "true",
                         }}
                       >
                         Raise Dispute
                       </Button>
                     </Grid>
-                    <Grid item>
+                    <Grid
+                      item
+                      component={Box}
+                      sx={{
+                        display:
+                          !item.ended ||
+                          item.escrowState == 4 ||
+                          item.escrowState == 5 ||
+                          item.escrowState == 6
+                            ? "none"
+                            : "true",
+                      }}
+                    >
                       <Button
                         variant={"contained"}
                         color="primary"
@@ -377,12 +412,39 @@ export default function CreatedAuctions(props) {
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",
                           marginBottom: "5px",
-                          display: !item.ended ? "none" : "true",
                           width: "200px",
                         }}
                         onClick={handleChatModalOpen}
                       >
                         Chat with Winner
+                      </Button>
+                    </Grid>
+                    <Grid
+                      item
+                      component={Box}
+                      sx={{
+                        display:
+                          !item.ended ||
+                          item.escrowState == 0 ||
+                          item.escrowState == 1 ||
+                          item.escrowState == 2 ||
+                          item.escrowState == 3
+                            ? "none"
+                            : "true",
+                      }}
+                    >
+                      <Button
+                        variant={"contained"}
+                        color="primary"
+                        sx={{
+                          bgcolor: "#2e5d4b",
+                          marginTop: "5px",
+                          marginBottom: "5px",
+                          width: "200px",
+                        }}
+                        onClick={handleCommitteeChatModalOpen}
+                      >
+                        Committee Chat
                       </Button>
                     </Grid>
                     <ChatModal
@@ -391,8 +453,24 @@ export default function CreatedAuctions(props) {
                       itemId={props.item.itemId}
                       pubKeyAddress={props.item.highestBidder}
                     ></ChatModal>
-                    <Grid container justifyContent="center" spacing={2}>
-                      <Grid item>
+                    <CommitteeChatModal
+                      isOpen={isCommitteeChatModalOpen}
+                      onClose={handleCommitteeChatModalClose}
+                      itemId={props.item.itemId}
+                      yesVotes={props.item.yesVotes} // buyer is right
+                      noVotes={props.item.noVotes} // seller is right
+                    ></CommitteeChatModal>
+                    <Grid
+                      container
+                      justifyContent="center"
+                      spacing={2}
+                      margin="auto"
+                    >
+                      <Grid
+                        item
+                        component={Box}
+                        sx={{ display: !auctionEndable ? "none" : "true" }}
+                      >
                         <Button
                           variant={"contained"}
                           color="primary"
@@ -403,13 +481,16 @@ export default function CreatedAuctions(props) {
                             marginTop: "5px",
                             marginBottom: "5px",
                             width: "200px",
-                            display: !auctionEndable ? "none" : "true",
                           }}
                         >
                           End Auction
                         </Button>
                       </Grid>
-                      <Grid item>
+                      <Grid
+                        item
+                        component={Box}
+                        sx={{ display: !item.ended ? "none" : "true" }}
+                      >
                         <Button
                           variant={"contained"}
                           color="primary"
@@ -419,7 +500,6 @@ export default function CreatedAuctions(props) {
                             marginTop: "5px",
                             marginBottom: "5px",
                             width: "200px",
-                            display: !item.ended ? "none" : "true",
                           }}
                         >
                           Reveal Address

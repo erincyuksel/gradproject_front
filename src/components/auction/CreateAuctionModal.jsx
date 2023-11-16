@@ -170,7 +170,7 @@ export default function CreateAuctionModal() {
                   color="primary"
                   type="submit"
                   sx={{ bgcolor: "#2e5d4b" }}
-                  disabled={!createItem}
+                  disabled={!createItem || !image}
                 >
                   Create
                 </Button>

@@ -23,6 +23,8 @@ import { Popover } from "@mui/material";
 import { Tooltip } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
+import { prepareWriteContract, writeContract } from "@wagmi/core";
+
 export default function AuctionItem(props) {
   const [url, setUrl] = useState("");
   const [hourRemaining, setHourRemaining] = useState("00");
@@ -83,14 +85,6 @@ export default function AuctionItem(props) {
       });
   }, []);
 
-  const { config: bidConfig } = usePrepareContractWrite({
-    address: auction.address,
-    abi: auction.abi,
-    functionName: "placeBid",
-    args: [props.item.itemId, BigInt(debouncedBid * 10 ** 18)],
-    account: address,
-  });
-
   const { config: approveConfig } = usePrepareContractWrite({
     address: obscurity.address,
     abi: obscurity.abi,
@@ -99,13 +93,19 @@ export default function AuctionItem(props) {
     account: address,
   });
 
-  const { writeAsync: placeBid } = useContractWrite(bidConfig);
   const { writeAsync: approve } = useContractWrite(approveConfig);
 
   const handleBid = () => {
     approve()
-      .then(() => {
-        placeBid()
+      .then(async () => {
+        const { request } = await prepareWriteContract({
+          address: auction.address,
+          abi: auction.abi,
+          functionName: "placeBid",
+          args: [props.item.itemId, BigInt(debouncedBid * 10 ** 18)],
+          account: address,
+        });
+        writeContract(request)
           .then(() => {
             enqueueSnackbar("You have successfully bid on the item!", {
               variant: "success",
