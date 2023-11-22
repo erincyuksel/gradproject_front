@@ -20,31 +20,6 @@ import utility from "../../utility";
 const CommitteeChatModal = ({ isOpen, onClose, itemId, yesVotes, noVotes }) => {
   const [committeeMembers, setCommitteeMembers] = useState([]);
   window.Buffer = Buffer;
-  const ethereumWallets = [
-    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-    "0xWalletAddress2",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    "0xWalletAddress3",
-    // Add more wallet addresses as needed
-  ];
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const { address } = useAccount();
@@ -71,6 +46,7 @@ const CommitteeChatModal = ({ isOpen, onClose, itemId, yesVotes, noVotes }) => {
       abi: auction.abi,
       functionName: "sendCommitteeChat",
       args: [itemId, transmissionMsg],
+      account: address,
     })
       .then(() => {
         enqueueSnackbar("Successfully sent the message!", {
@@ -83,6 +59,7 @@ const CommitteeChatModal = ({ isOpen, onClose, itemId, yesVotes, noVotes }) => {
         setMessage("");
       })
       .catch((e) => {
+        console.log(e);
         enqueueSnackbar("There was a problem during message transmission!", {
           variant: "error",
         });

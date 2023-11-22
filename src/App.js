@@ -11,6 +11,7 @@ import { WagmiConfig, createConfig, configureChains, mainnet } from "wagmi";
 import { localhost } from "viem/chains";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import MyAuctions from "./pages/MyAuctions";
+import Disputes from "./pages/Disputes";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [localhost],
   [publicProvider()]
@@ -40,6 +41,9 @@ function App() {
         </Routes>
         <Routes>
           <Route path="/myAuctions" element={<MyAuctions />} />
+        </Routes>
+        <Routes>
+          <Route path="/Disputes" element={<Disputes />} />
         </Routes>
       </div>
     </WagmiConfig>
