@@ -11,6 +11,7 @@ import {
   Tooltip,
   Popover,
 } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
 import utility from "../../utility";
@@ -50,16 +51,7 @@ export default function CreatedAuctions(props) {
     account: address,
   });
 
-  const { config: raiseDisputeConfig } = usePrepareContractWrite({
-    address: auction.address,
-    abi: auction.abi,
-    functionName: "raiseDispute",
-    args: [item.itemId],
-    account: address,
-  });
-
   const { writeAsync: endAuction } = useContractWrite(endAuctionConfig);
-  const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
 
   useEffect(() => {
     console.log(item.escrowState);
@@ -131,8 +123,15 @@ export default function CreatedAuctions(props) {
       });
   };
 
-  const handleRaiseDispute = () => {
-    raiseDispute()
+  const handleRaiseDispute = async () => {
+    const { request } = await prepareWriteContract({
+      address: auction.address,
+      abi: auction.abi,
+      functionName: "raiseDispute",
+      args: [item.itemId],
+      account: address,
+    });
+    writeContract(request)
       .then(() => {
         enqueueSnackbar("You have successfully risen dispute!", {
           variant: "success",
@@ -408,6 +407,7 @@ export default function CreatedAuctions(props) {
                       <Button
                         variant={"contained"}
                         color="primary"
+                        endIcon={<ChatIcon />}
                         sx={{
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",
@@ -436,6 +436,7 @@ export default function CreatedAuctions(props) {
                       <Button
                         variant={"contained"}
                         color="primary"
+                        endIcon={<ChatIcon />}
                         sx={{
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",

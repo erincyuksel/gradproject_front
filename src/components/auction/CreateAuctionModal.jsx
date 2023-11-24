@@ -160,7 +160,7 @@ export default function CreateAuctionModal() {
                     />
                   </Button>
                 </Grid>
-                <Grid item xs={6} sx={{ marginTop: "5px" }}>
+                <Grid item xs={12} sx={{ marginTop: "5px" }}>
                   <Typography>{image.name}</Typography>
                 </Grid>
               </Grid>

@@ -259,13 +259,13 @@ export default function ProposalItem(props) {
         avatar={decideAvatarRender()}
       ></CardHeader>
       <CardContent>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+        <Typography sx={{ fontSize: 14 }} gutterBottom component="h2">
           PROPOSAL CATEGORY: {getProposalCategory()}
         </Typography>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-          PROPOSAL FIELD TO SET: {getProposalField()}
+        <Typography sx={{ fontSize: 14 }} component="h2" gutterBottom>
+          PROPOSAL FIELD TO SET: {getProposalField()} seconds
         </Typography>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+        <Typography sx={{ fontSize: 14 }} component="h2" gutterBottom>
           PROPOSAL DESCRIPTION: {props.proposal.description.split("-")[0]}
         </Typography>
       </CardContent>

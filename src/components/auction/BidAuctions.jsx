@@ -23,6 +23,8 @@ import { enqueueSnackbar } from "notistack";
 import ChatModal from "../generic/ChatModal";
 import CommitteeChatModal from "../generic/CommitteeChatModal";
 import DeliveryAddressPopover from "./DeliveryAddressPopover";
+import ChatIcon from "@mui/icons-material/Chat";
+
 export default function BidAuctions(props) {
   const { children, value, index, item, ...other } = props;
   const [isGenuine, setIsGenuine] = useState(true);
@@ -45,16 +47,7 @@ export default function BidAuctions(props) {
     account: address,
   });
 
-  const { config: raiseDisputeConfig } = usePrepareContractWrite({
-    address: auction.address,
-    abi: auction.abi,
-    functionName: "raiseDispute",
-    args: [item.itemId],
-    account: address,
-  });
-
   const { writeAsync: endAuction } = useContractWrite(endAuctionConfig);
-  const { writeAsync: raiseDispute } = useContractWrite(raiseDisputeConfig);
 
   useEffect(() => {
     console.log(item.escrowState);
@@ -126,14 +119,23 @@ export default function BidAuctions(props) {
       });
   };
 
-  const handleRaiseDispute = () => {
-    raiseDispute()
+  const handleRaiseDispute = async () => {
+    const { request } = await prepareWriteContract({
+      address: auction.address,
+      abi: auction.abi,
+      functionName: "raiseDispute",
+      args: [item.itemId],
+      account: address,
+    });
+
+    writeContract(request)
       .then(() => {
         enqueueSnackbar("You have successfully risen dispute!", {
           variant: "success",
         });
       })
       .catch((e) => {
+        console.log(e);
         enqueueSnackbar("Something went wrong!", { variant: "error" });
       });
   };
@@ -382,6 +384,7 @@ export default function BidAuctions(props) {
                       <Button
                         variant={"contained"}
                         color="primary"
+                        endIcon={<ChatIcon />}
                         sx={{
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",
@@ -410,6 +413,7 @@ export default function BidAuctions(props) {
                       <Button
                         variant={"contained"}
                         color="primary"
+                        endIcon={<ChatIcon />}
                         sx={{
                           bgcolor: "#2e5d4b",
                           marginTop: "5px",

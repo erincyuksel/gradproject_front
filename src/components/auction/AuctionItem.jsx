@@ -209,25 +209,31 @@ export default function AuctionItem(props) {
         </Typography>
         <Grid container direction="column" alignItems="center">
           <Grid item>
-            <Typography gutterBottom variant="body2" color="text.secondary">
+            <Typography gutterBottom variant="body2" color="bold">
+              Reserve Price: {Number(props.item.reservePrice) / 10 ** 18} OT
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography gutterBottom variant="body2" color="bold">
               {"Highest Bid: " +
                 Number(props.item.highestBid) / 10 ** 18 +
                 " OT"}
             </Typography>
           </Grid>
+
           <Grid item>
-            <Typography gutterBottom variant="body2" color="text.secondary">
+            <Typography gutterBottom variant="body2" color="bold">
               {"Auction Owner: " + props.item.seller}
             </Typography>
           </Grid>
           <Grid item>
-            <Typography gutterBottom variant="body2" color="text.secondary">
+            <Typography gutterBottom variant="body2" color="bold">
               {"Bidder: " + props.item.highestBidder}
             </Typography>
           </Grid>
           <Grid item>
-            <Typography gutterBottom variant="body2" color="text.secondary">
-              {props.item.ended ? "ENDED" : "ONGOING"}
+            <Typography gutterBottom variant="body2" color="bold">
+              Auction State: {props.item.ended ? "ENDED" : "ONGOING"}
             </Typography>
           </Grid>
         </Grid>

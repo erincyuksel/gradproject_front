@@ -21,7 +21,7 @@ export default function Disputes() {
     if (data && data[0] && data[0].result) {
       let dispute = [];
       data[0].result.forEach((item) => {
-        if (item.escrowState != 4) {
+        if (item.escrowState == 4) {
           dispute.push({
             id: item.itemId,
             user: item.seller,
@@ -65,7 +65,6 @@ export default function Disputes() {
             padding: "20px",
             background: "white",
             marginTop: "50px",
-            marginRight: "auto",
             background: "linear-gradient(to right bottom, #430089, #82ffa1)",
             height: "600px",
           }}

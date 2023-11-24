@@ -1,13 +1,13 @@
 /* global BigInt */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   IconButton,
   Popover,
   Typography,
   Button,
   TextField,
-  Grid,
 } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {
   useAccount,
@@ -194,7 +194,7 @@ const ProfilePopover = () => {
           <Typography>Token Balance: {balance} OT</Typography>
           <Typography>Current Stake: {stakedAmount} OT</Typography>
           <Typography>Needed Stake Amount: {stakeRequired} OT</Typography>
-          <Typography>Auction Duration: {auctionDuration}</Typography>
+          <Typography>Auction Duration: {auctionDuration} seconds</Typography>
           <Typography>
             Concurrent Auctions Per User: {concurrentAuctions}
           </Typography>
@@ -242,10 +242,10 @@ const ProfilePopover = () => {
             <Button
               variant="contained"
               color="secondary"
-              fullWidth
               style={{ marginLeft: "16px", backgroundColor: "#2e5d4b" }}
               onClick={handleSetStakeTokens}
               disabled={!isStakeAllowed}
+              endIcon={<LockIcon />}
             >
               Stake Tokens
             </Button>

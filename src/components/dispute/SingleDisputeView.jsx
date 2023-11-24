@@ -9,12 +9,20 @@ import {
   CardActions,
 } from "@mui/material";
 import { writeContract, prepareWriteContract } from "@wagmi/core";
-import { useAccount } from "wagmi";
+import { useAccount, useContractReads } from "wagmi";
 import auction from "../../auction.json";
 import CommitteeChatModal from "../generic/CommitteeChatModal";
 import { enqueueSnackbar } from "notistack";
+import ChatIcon from "@mui/icons-material/Chat";
+import GavelIcon from "@mui/icons-material/Gavel";
 
 const SingleDisputeView = ({ dispute }) => {
+  const { data } = useContractReads({
+    contracts: [
+      { ...auction, functionName: "getAuctionItem", args: [dispute.id] },
+    ],
+    watch: true,
+  });
   const [isCommitteeChatModalOpen, setCommitteeChatModalOpen] =
     React.useState(false);
 
@@ -172,6 +180,7 @@ const SingleDisputeView = ({ dispute }) => {
               <Button
                 variant="contained"
                 onClick={handleCommitteeChatModalOpen}
+                endIcon={<ChatIcon />}
                 sx={{
                   bgcolor: "#2e5d4b",
                   marginTop: "5px",
@@ -195,10 +204,10 @@ const SingleDisputeView = ({ dispute }) => {
           <Button
             variant="contained"
             onClick={handleFinalize}
+            endIcon={<GavelIcon />}
             sx={{
               bgcolor: "#2e5d4b",
               marginBottom: "5px",
-              width: "85px",
             }}
           >
             FINALIZE

@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ListItem, Typography, Container } from "@mui/material";
+import { List, ListItem, Container } from "@mui/material";
 
 const DisputesList = ({ disputes, onDisputeClick }) => {
   return (
