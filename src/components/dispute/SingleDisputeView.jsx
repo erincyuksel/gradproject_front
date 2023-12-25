@@ -112,6 +112,24 @@ const SingleDisputeView = ({ dispute }) => {
       });
   }, []);
 
+  const getEscrowState = (escrowState) => {
+    switch (escrowState) {
+      case 0:
+        return "Awaiting Delivery Address";
+      case 1:
+        return "Preparing Item";
+      case 2:
+        return "Item on Delivery";
+      case 3:
+        return "Item Received";
+      case 4:
+        return "Dispute";
+      case 5:
+        return "Dispute Resolved";
+      case 6:
+        return "Cancelled";
+    }
+  };
   return (
     <Box display="flex" justifyContent="center" width="100%">
       <Card
@@ -137,12 +155,17 @@ const SingleDisputeView = ({ dispute }) => {
             <Grid item>
               <Typography variant="body1">{`Buyer: ${dispute.customer}`}</Typography>
             </Grid>
-
             <Grid item>
-              <Typography variant="body1">{`Votes for Buyer: ${dispute.votes.buyer}`}</Typography>
+              <Typography variant="body1">
+                {`Escrow State Before Dispute Was Raised: ` +
+                  getEscrowState(data ? data[0].result[8] : 0)}
+              </Typography>
             </Grid>
             <Grid item>
-              <Typography variant="body1">{`Votes for Seller: ${dispute.votes.seller}`}</Typography>
+              <Typography variant="body1">{`Votes for Cancellation: ${dispute.votes.buyer}`}</Typography>
+            </Grid>
+            <Grid item>
+              <Typography variant="body1">{`Votes for Finalization: ${dispute.votes.seller}`}</Typography>
             </Grid>
           </Grid>
           <Grid item container justifyContent="center" spacing={2}>
@@ -158,7 +181,7 @@ const SingleDisputeView = ({ dispute }) => {
                   width: "200px",
                 }}
               >
-                Vote for Buyer
+                Vote for Cancellation
               </Button>
             </Grid>
             <Grid item>
@@ -173,7 +196,7 @@ const SingleDisputeView = ({ dispute }) => {
                   width: "200px",
                 }}
               >
-                Vote for Seller
+                Vote for Finalization
               </Button>
             </Grid>
             <Grid item>

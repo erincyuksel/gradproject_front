@@ -128,7 +128,7 @@ export default function CreatedAuctions(props) {
       address: auction.address,
       abi: auction.abi,
       functionName: "raiseDispute",
-      args: [item.itemId],
+      args: [item.itemId, item.escrowState],
       account: address,
     });
     writeContract(request)
@@ -238,7 +238,7 @@ export default function CreatedAuctions(props) {
         args: [item.itemId, nextEscrowState],
       });
       await writeContract(request);
-      setIsTransitionable(checkIfTransitionable(nextEscrowState + 1));
+      setIsTransitionable(checkIfTransitionable(nextEscrowState));
       enqueueSnackbar("Successfully transitioned escrow process", {
         variant: "success",
       });

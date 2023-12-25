@@ -17,7 +17,7 @@ import { styled } from "@mui/material/styles";
 import utils from "../../utility";
 import { enqueueSnackbar } from "notistack";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
-export default function CreateAuctionModal() {
+export default function CreateAuctionModal(props) {
   const style = {
     position: "absolute",
     top: "50%",
@@ -53,6 +53,7 @@ export default function CreateAuctionModal() {
             enqueueSnackbar("Successfully listed auction item", {
               variant: "success",
             });
+            props.onClose();
           })
           .catch((e) => {
             enqueueSnackbar("Something went wrong!", { variant: "error" });

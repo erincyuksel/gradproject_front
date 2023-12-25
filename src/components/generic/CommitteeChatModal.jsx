@@ -109,7 +109,7 @@ const CommitteeChatModal = ({ isOpen, onClose, itemId, yesVotes, noVotes }) => {
           <List>
             {committeeMembers.map((wallet, index) => (
               <ListItem key={index}>
-                <ListItemText primary={wallet} />
+                <ListItemText primary={wallet} sx={{ color: "white" }} />
               </ListItem>
             ))}
           </List>
@@ -142,6 +142,7 @@ const CommitteeChatModal = ({ isOpen, onClose, itemId, yesVotes, noVotes }) => {
                     }
                     style={{
                       textAlign: msg.sender !== "You" ? "left" : "right",
+                      color: "white",
                     }}
                   />
                 </ListItem>
@@ -159,8 +160,12 @@ const CommitteeChatModal = ({ isOpen, onClose, itemId, yesVotes, noVotes }) => {
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
-            <p>Votes in favor of Buyer: {yesVotes}</p>
-            <p>Votes in favor of Seller: {noVotes}</p>
+            <p style={{ color: "white" }}>
+              Votes in favor of Cancellation: {yesVotes}
+            </p>
+            <p style={{ color: "white" }}>
+              Votes in favor of Finalization: {noVotes}
+            </p>
           </Box>
         </Box>
         <TextField

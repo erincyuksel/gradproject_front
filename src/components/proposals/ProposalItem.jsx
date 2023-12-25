@@ -14,6 +14,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import auction from "../../auction.json";
 import { keccak256 } from "@ethersproject/keccak256";
 import { toUtf8Bytes } from "@ethersproject/strings";
+import { writeContract } from "@wagmi/core";
 import { useState, useEffect } from "react";
 import {
   useAccount,
@@ -46,28 +47,12 @@ export default function ProposalItem(props) {
   };
 
   const [proposalState, setProposalState] = useState(0);
+  const [yesVotes, setYesVotes] = useState(0);
+  const [noVotes, setNoVotes] = useState(0);
   const { address, isConnected } = useAccount();
   const [canVote, setCanVote] = useState(true);
-  const [canQueue, setCanQueue] = useState(false);
-  const [canExecute, setCanExecute] = useState(false);
   const [encodedFunction, setEncodedFunction] = useState("");
   const [descriptionHash, setDescriptionHash] = useState("");
-
-  const { config: voteYesConfig } = usePrepareContractWrite({
-    address: governor.address,
-    abi: governor.abi,
-    functionName: "castVote",
-    args: [props.proposal.proposalId, 1],
-    account: address,
-  });
-
-  const { config: voteNoConfig } = usePrepareContractWrite({
-    address: governor.address,
-    abi: governor.abi,
-    functionName: "castVote",
-    args: [props.proposal.proposalId, 0],
-    account: address,
-  });
 
   const { config: queueProposalConfig } = usePrepareContractWrite({
     address: governor.address,
@@ -84,11 +69,6 @@ export default function ProposalItem(props) {
     args: [[auction.address], [0], [encodedFunction], descriptionHash],
     account: address,
   });
-
-  const { data: data1, writeAsync: voteYesFunc } =
-    useContractWrite(voteYesConfig);
-  const { data: data2, writeAsync: voteNoFunc } =
-    useContractWrite(voteNoConfig);
 
   const { data: data3, writeAsync: queueFunc } =
     useContractWrite(queueProposalConfig);
@@ -136,10 +116,8 @@ export default function ProposalItem(props) {
   const getProposalCategory = () => {
     let category = props.proposal.description.split("-")[1];
     if (category == 0) {
-      return "Auction Duration";
-    } else if (category == 1) {
       return "Concurrent Auctions Per User";
-    } else if (category == 2) {
+    } else if (category == 1) {
       return "Tokens Required to Stake";
     }
   };
@@ -189,13 +167,23 @@ export default function ProposalItem(props) {
       args: [props.proposal.description.split("-")[2]],
     });
     setEncodedFunction(funcData);
-    if (data) setProposalState(data[0].result);
+    if (data) {
+      setProposalState(data[0].result);
+      setYesVotes(Number(data[1].result[1]) / 10 ** 18);
+      setNoVotes(Number(data[1].result[0]) / 10 ** 18);
+    }
   }, [data]);
 
   if (!data) return <></>;
 
-  const handleVoteYes = () => {
-    voteYesFunc()
+  const handleVoteYes = async () => {
+    await writeContract({
+      address: governor.address,
+      abi: governor.abi,
+      functionName: "castVote",
+      args: [props.proposal.proposalId, 1],
+      account: address,
+    })
       .then(() => {
         enqueueSnackbar("You have successfully voted!", { variant: "success" });
       })
@@ -204,8 +192,14 @@ export default function ProposalItem(props) {
       });
   };
 
-  const handleVoteNo = () => {
-    voteNoFunc()
+  const handleVoteNo = async () => {
+    await writeContract({
+      address: governor.address,
+      abi: governor.abi,
+      functionName: "castVote",
+      args: [props.proposal.proposalId, 0],
+      account: address,
+    })
       .then(() => {
         enqueueSnackbar("You have successfully voted!", { variant: "success" });
       })
@@ -238,6 +232,29 @@ export default function ProposalItem(props) {
       });
   };
 
+  const renderVoteStatus = () => {
+    const totalVotes = yesVotes + noVotes;
+    const yesPercentage = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 0;
+    const noPercentage = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 0;
+    console.log(yesPercentage);
+    return (
+      <div>
+        <div
+          style={{ marginBottom: "10px", fontSize: "16px", fontWeight: "bold" }}
+        >
+          Yes Votes: {yesVotes} ({yesPercentage.toFixed(1)}%), No Votes:{" "}
+          {noVotes} ({noPercentage.toFixed(1)}%)
+        </div>
+        <div style={{ display: "flex", width: "100%", height: "30px" }}>
+          <div
+            style={{ width: `${yesPercentage}%`, backgroundColor: "green" }}
+          />
+          <div style={{ width: `${noPercentage}%`, backgroundColor: "red" }} />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card
       sx={{
@@ -246,7 +263,6 @@ export default function ProposalItem(props) {
         marginLeft: "110px",
         marginBottom: "50px",
       }}
-      onClick={() => console.log(data[2].result)}
     >
       <CardHeader
         title={
@@ -280,7 +296,6 @@ export default function ProposalItem(props) {
                   sx={{ backgroundColor: "#2e5d4b" }}
                   size="large"
                   onClick={() => handleVoteYes()}
-                  disabled={!voteYesFunc}
                 >
                   VOTE YES
                 </Button>
@@ -292,7 +307,6 @@ export default function ProposalItem(props) {
                   sx={{ backgroundColor: "red" }}
                   size="large"
                   onClick={() => handleVoteNo()}
-                  disabled={!voteNoFunc}
                 >
                   VOTE NO
                 </Button>
@@ -329,6 +343,7 @@ export default function ProposalItem(props) {
           )}
         </Grid>
       </CardActions>
+      {renderVoteStatus()}
     </Card>
   );
 }

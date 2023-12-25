@@ -124,7 +124,7 @@ export default function BidAuctions(props) {
       address: auction.address,
       abi: auction.abi,
       functionName: "raiseDispute",
-      args: [item.itemId],
+      args: [item.itemId, item.escrowState],
       account: address,
     });
 
@@ -213,7 +213,7 @@ export default function BidAuctions(props) {
         args: [item.itemId, nextEscrowState],
       });
       await writeContract(request);
-      setIsTransitionable(checkIfTransitionable(nextEscrowState + 1));
+      setIsTransitionable(checkIfTransitionable(nextEscrowState));
       enqueueSnackbar("Successfully transitioned escrow process", {
         variant: "success",
       });
@@ -471,7 +471,11 @@ export default function BidAuctions(props) {
                           End Auction
                         </Button>
                       </Grid>
-                      <Grid item>
+                      <Grid
+                        item
+                        component={Box}
+                        sx={{ display: !props.item.ended ? "none" : "true" }}
+                      >
                         <Button
                           variant={"contained"}
                           color="primary"

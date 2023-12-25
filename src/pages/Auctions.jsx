@@ -50,7 +50,7 @@ function Auctions() {
 
       <Modal open={open} onClose={handleClose}>
         <>
-          <CreateAuctionModal></CreateAuctionModal>
+          <CreateAuctionModal onClose={handleClose}></CreateAuctionModal>
         </>
       </Modal>
       <Grid container spacing={2}>

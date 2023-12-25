@@ -144,6 +144,11 @@
           "type": "uint8"
         },
         {
+          "internalType": "enum Auction.EscrowState",
+          "name": "stateBeforeDispute",
+          "type": "uint8"
+        },
+        {
           "internalType": "uint8",
           "name": "yesVotes",
           "type": "uint8"
@@ -333,6 +338,11 @@
               "type": "uint8"
             },
             {
+              "internalType": "enum Auction.EscrowState",
+              "name": "stateBeforeDispute",
+              "type": "uint8"
+            },
+            {
               "internalType": "uint8",
               "name": "yesVotes",
               "type": "uint8"
@@ -428,6 +438,11 @@
               "type": "uint8"
             },
             {
+              "internalType": "enum Auction.EscrowState",
+              "name": "stateBeforeDispute",
+              "type": "uint8"
+            },
+            {
               "internalType": "uint8",
               "name": "yesVotes",
               "type": "uint8"
@@ -508,6 +523,11 @@
           "internalType": "bool",
           "name": "",
           "type": "bool"
+        },
+        {
+          "internalType": "enum Auction.EscrowState",
+          "name": "stateBeforeDispute",
+          "type": "uint8"
         }
       ],
       "stateMutability": "view",
@@ -692,6 +712,11 @@
               "type": "uint8"
             },
             {
+              "internalType": "enum Auction.EscrowState",
+              "name": "stateBeforeDispute",
+              "type": "uint8"
+            },
+            {
               "internalType": "uint8",
               "name": "yesVotes",
               "type": "uint8"
@@ -790,6 +815,11 @@
             {
               "internalType": "enum Auction.EscrowState",
               "name": "escrowState",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum Auction.EscrowState",
+              "name": "stateBeforeDispute",
               "type": "uint8"
             },
             {
@@ -966,6 +996,11 @@
           "internalType": "string",
           "name": "itemId",
           "type": "string"
+        },
+        {
+          "internalType": "enum Auction.EscrowState",
+          "name": "currentState",
+          "type": "uint8"
         }
       ],
       "name": "raiseDispute",

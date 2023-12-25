@@ -101,8 +101,6 @@ export default function CreateProposalModal(props) {
   const handleEncode = (proposalField) => {
     let funcToExecute = "";
     if (category == 0) {
-      funcToExecute = "setAuctionDuration";
-    } else if (category == 1) {
       funcToExecute = "setConcurrentAuctionsPerUser";
     } else {
       funcToExecute = "setTokensToStake";
@@ -170,9 +168,8 @@ export default function CreateProposalModal(props) {
                   onChange={handleChange}
                   value={category}
                 >
-                  <MenuItem value={0}>Auction Duration</MenuItem>
-                  <MenuItem value={1}>Concurrent Auctions</MenuItem>
-                  <MenuItem value={2}>Tokens to Stake</MenuItem>
+                  <MenuItem value={0}>Concurrent Auctions</MenuItem>
+                  <MenuItem value={1}>Tokens to Stake</MenuItem>
                 </Select>
               </Grid>
               <Grid item xs={12}>
