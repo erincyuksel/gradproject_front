@@ -123,11 +123,11 @@ export default function ProposalItem(props) {
   };
 
   const getProposalField = () => {
-    if (props.proposal.description.split("-")[1] == 2) {
+    if (props.proposal.description.split("-")[1] == 1) {
       let field = props.proposal.description.split("-")[2];
-      return field / 10 ** 18;
+      return field / 10 ** 18 + " OT";
     } else {
-      return props.proposal.description.split("-")[2];
+      return props.proposal.description.split("-")[2] + " concurrent auctions";
     }
   };
 
@@ -279,7 +279,7 @@ export default function ProposalItem(props) {
           PROPOSAL CATEGORY: {getProposalCategory()}
         </Typography>
         <Typography sx={{ fontSize: 14 }} component="h2" gutterBottom>
-          PROPOSAL FIELD TO SET: {getProposalField()} seconds
+          PROPOSAL FIELD TO SET: {getProposalField()}
         </Typography>
         <Typography sx={{ fontSize: 14 }} component="h2" gutterBottom>
           PROPOSAL DESCRIPTION: {props.proposal.description.split("-")[0]}

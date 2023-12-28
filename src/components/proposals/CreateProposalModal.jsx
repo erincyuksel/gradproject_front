@@ -120,19 +120,6 @@ export default function CreateProposalModal(props) {
     if (category == 0) {
       return (
         <TextField
-          placeholder="Duration in Hours"
-          required
-          type="number"
-          fullWidth
-          label="Duration in Hours"
-          onChange={(e) => {
-            handleEncode(60 * 60 * e.target.value);
-          }}
-        />
-      );
-    } else if (category == 1) {
-      return (
-        <TextField
           placeholder="Concurrent Auctions"
           required
           type="number"
