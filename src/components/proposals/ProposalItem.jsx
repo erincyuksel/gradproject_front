@@ -154,10 +154,8 @@ export default function ProposalItem(props) {
     let category = props.proposal.description.split("-")[1];
     let funcToExecute = "";
     if (category == 0) {
-      funcToExecute = "setAuctionDuration";
-    } else if (category == 1) {
       funcToExecute = "setConcurrentAuctionsPerUser";
-    } else {
+    } else if (category == 1) {
       funcToExecute = "setTokensToStake";
     }
     setDescriptionHash(keccak256(toUtf8Bytes(props.proposal.description)));
@@ -262,6 +260,9 @@ export default function ProposalItem(props) {
         background: "linear-gradient(to right bottom, #430089, #82ffa1)",
         marginLeft: "110px",
         marginBottom: "50px",
+      }}
+      onClick={() => {
+        console.log(props.proposal);
       }}
     >
       <CardHeader

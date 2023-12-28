@@ -102,7 +102,7 @@ export default function CreateProposalModal(props) {
     let funcToExecute = "";
     if (category == 0) {
       funcToExecute = "setConcurrentAuctionsPerUser";
-    } else {
+    } else if (category == 1) {
       funcToExecute = "setTokensToStake";
     }
     const data = encodeFunctionData({
@@ -128,7 +128,7 @@ export default function CreateProposalModal(props) {
           onChange={(e) => handleEncode(e.target.value)}
         />
       );
-    } else {
+    } else if (category == 1) {
       return (
         <TextField
           placeholder="Tokens to Stake"
