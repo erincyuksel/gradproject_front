@@ -7,10 +7,15 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import auction from "../../auction.json";
-import { usePrepareContractWrite, useContractWrite } from "wagmi";
+import {
+  usePrepareContractWrite,
+  useContractWrite,
+  useContractReads,
+  useAccount,
+} from "wagmi";
 import { useDebounce } from "../../hooks/useDebounce";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
@@ -69,12 +74,28 @@ export default function CreateAuctionModal(props) {
   const [image, setImage] = useState("");
   const [hashOfImage, setHashOfImage] = useState(Array(32).fill(0));
   const [uuid, setUuid] = useState(uuidv4());
-
+  const { isConnected, address } = useAccount();
   const debouncedAuctionName = useDebounce(auctionName, 500);
   const debouncedUuid = useDebounce(uuid, 500);
   const debouncedReservePrice = useDebounce(reservePrice, 500);
   const debouncedItemDescription = useDebounce(itemDescription, 500);
   const debouncedHashOfImage = useDebounce(hashOfImage, 500);
+
+  const { data, isError, isLoading } = useContractReads({
+    contracts: [
+      {
+        ...auction,
+        functionName: "getTokensToStake",
+      },
+      {
+        ...auction,
+        functionName: "getPubKey",
+        args: [address],
+      },
+      { ...auction, functionName: "getActiveAuctioneer", args: [address] },
+    ],
+    watch: true,
+  });
 
   const { config } = usePrepareContractWrite({
     address: auction.address,
@@ -106,10 +127,34 @@ export default function CreateAuctionModal(props) {
     }
   };
 
+  const checkIfKeyExists = () => {
+    if (data && data[1]) {
+      if (data[1].result === "") {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const checkIfStaked = () => {
+    if (data && data[0] && data[2]) {
+      if (Number(data[2].result[0]) < Number(data[0].result)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <Grid container justify="center" spacing={1}>
       <Grid item xs={12}>
         <Card sx={style}>
+          {!checkIfKeyExists() && (
+            <div style={{ color: "red" }}>Create a key pair first!</div>
+          )}
+          {!checkIfStaked() && (
+            <div style={{ color: "red" }}>Not enough tokens staked!</div>
+          )}
           <CardHeader title="Create Auction"></CardHeader>
           <form autoComplete="off" onSubmit={handleSubmit}>
             <Grid item container spacing={1} justify="center">
