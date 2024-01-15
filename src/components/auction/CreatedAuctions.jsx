@@ -124,6 +124,11 @@ export default function CreatedAuctions(props) {
   };
 
   const handleRaiseDispute = async () => {
+    console.log(props.item);
+    if (props.item.ended) {
+      enqueueSnackbar("Auction has already ended!", { variant: "error" });
+      return;
+    }
     const { request } = await prepareWriteContract({
       address: auction.address,
       abi: auction.abi,

@@ -120,6 +120,10 @@ export default function BidAuctions(props) {
   };
 
   const handleRaiseDispute = async () => {
+    if (props.item.ended) {
+      enqueueSnackbar("Auction has already ended!", { variant: "error" });
+      return;
+    }
     const { request } = await prepareWriteContract({
       address: auction.address,
       abi: auction.abi,
