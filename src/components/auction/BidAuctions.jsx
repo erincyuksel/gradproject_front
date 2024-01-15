@@ -120,7 +120,11 @@ export default function BidAuctions(props) {
   };
 
   const handleRaiseDispute = async () => {
-    if (props.item.ended) {
+    if (
+      props.item.escrowState != 0 &&
+      props.item.escrowState != 1 &&
+      props.item.escrowState != 2
+    ) {
       enqueueSnackbar("Auction has already ended!", { variant: "error" });
       return;
     }

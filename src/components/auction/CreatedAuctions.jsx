@@ -124,8 +124,11 @@ export default function CreatedAuctions(props) {
   };
 
   const handleRaiseDispute = async () => {
-    console.log(props.item);
-    if (props.item.ended) {
+    if (
+      props.item.escrowState != 0 &&
+      props.item.escrowState != 1 &&
+      props.item.escrowState != 2
+    ) {
       enqueueSnackbar("Auction has already ended!", { variant: "error" });
       return;
     }
